@@ -1,0 +1,296 @@
+---
+title: "Исследование метаданных DNS трафика"
+subtitle: "Отчет по практике 4"
+author: "Zid4a84@yandex.ru"
+format: 
+  md:
+    output-file: README.md
+---
+
+## Цель работы
+
+1.  Зекрепить практические навыки использования языка программирования R для обработки данных
+2.  Закрепить знания основных функций обработки данных экосистемы tidyverse языка R
+3.  Закрепить навыки исследования метаданных DNS трафика
+
+## Исходные данные
+
+1.  Программное обеспечение ОС Windows 11 Pro
+2.  RStudio
+3.  Интерпретатор языка R 4.5.1
+
+## План
+
+1. Импортируйте данные DNS – https://storage.yandexcloud.net/dataset.ctfsec/dns.zip
+Данные были собраны с помощью сетевого анализатора zeek
+2. Добавьте пропущенные данные о структуре данных (назначении столбцов)
+3. Преобразуйте данные в столбцах в нужный формат,просмотрите общую структуру данных с помощью функции glimpse()
+4. Сколько участников информационного обмена всети Доброй Организации?
+5. Какое соотношение участников обмена внутрисети и участников обращений к внешним ресурсам?
+6. Найдите топ-10 участников сети, проявляющих наибольшую сетевую активность.
+7. Найдите топ-10 доменов, к которым обращаются пользователи сети и соответственное количество обращений
+8. Опеределите базовые статистические характеристики (функция summary() ) интервала времени между последовательными обращениями к топ-10 доменам.
+9. Часто вредоносное программное обеспечение использует DNS канал в качестве канала управления, периодически отправляя запросы на подконтрольный злоумышленникам DNS сервер. По периодическим запросам на один и тот же домен можно выявить скрытый DNS канал. Есть ли такие IP адреса в исследуемом датасете?
+10. Определите местоположение (страну, город) и организацию-провайдера для топ-10 доменов. Для этого можно использовать сторонние сервисы,например http://ip-api.com (API-эндпоинт –
+http://ip-api.com/json).
+
+## Шаги:
+
+```{r}
+options(repos = c(CRAN = "https://mirror.truenetwork.ru/CRAN/"))
+install.packages("readr")
+install.packages("dplyr")
+install.packages("stringr")
+install.packages("httr")
+install.packages("jsonlite")
+library(httr)
+library(jsonlite)
+library(readr)
+library(dplyr)
+library(stringr)
+library(knitr)
+temp_dir <- tempdir()
+download.file(
+  url = "https://storage.yandexcloud.net/dataset.ctfsec/dns.zip",
+  destfile = file.path(temp_dir, "dns.zip"),
+  mode = "wb"
+)
+unzip(
+  zipfile = file.path(temp_dir, "dns.zip"),
+  exdir = temp_dir
+)
+log_files <- list.files(temp_dir, pattern = "\\.log$", full.names = TRUE)
+```
+
+```{r}
+# Вектор с названиями столбцов на основе документации Zeek
+column_names <- c(
+  "timestamp", "uid", "source_ip", "source_port", "destination_ip", 
+  "destination_port", "protocol", "transaction_id", "query", "qclass", 
+  "qclass_name", "qtype", "qtype_name", "rcode", "rcode_name", 
+  "AA", "TC", "RD", "RA", "Z", "answers", "TTLS", "rejected"
+)
+dns_data <- invisible(read_delim(
+  log_files[1],
+  delim = "\t",
+  col_names = column_names,
+  comment = "#",
+  na = c("", "NA", "-"),
+  trim_ws = TRUE,
+  show_col_types = FALSE
+)) %>% as_tibble()
+head(dns_data,10)
+```
+
+```{r}
+dns_data_clean <- dns_data %>%
+  mutate(
+    timestamp = as.POSIXct(timestamp, origin = "1970-01-01"),
+    source_port = as.numeric(source_port),
+    destination_port = as.numeric(destination_port),
+    transaction_id = as.numeric(transaction_id),
+    qclass = as.numeric(qclass),
+    qtype = as.numeric(qtype),
+    rcode = as.numeric(rcode),
+  ) %>% as_tibble()
+head(dns_data_clean,10)
+
+```
+
+```{r}
+# Задача 4: Сколько участников информационного обмена в сети Доброй Организации?
+unique_source_ips <- unique(dns_data_clean$source_ip)
+unique_destination_ips <- unique(dns_data_clean$destination_ip)
+all_ips<-unique(c(unique_source_ips, unique_destination_ips))
+length(all_ips)
+```
+
+```{r}
+# Задача 5: Соотношение участников обмена внутри сети и участников обращений к внешним ресурсам
+internal_ips <- all_ips[grepl("^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.)", all_ips)]
+external_ips <- all_ips[!grepl("^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.)", all_ips)]
+length(internal_ips) / length(external_ips)
+
+```
+
+```{r}
+# Задача 6: Найдите топ-10 участников сети, проявляющих наибольшую сетевую активность
+dns_data_clean%>%
+  group_by(source_ip)%>%
+  count(sort = TRUE) %>%
+  as_tibble() %>%
+  head(10)
+```
+
+```{r}
+# Задача 7:Найдите топ-10 доменов, к которым обращаются пользователи сети и соответственное количество обращений
+top_10_domains <- dns_data_clean%>%count(query, sort = TRUE) %>%
+  as_tibble() %>% head(10)
+top_10_domains
+```
+
+```{r}
+# Задача 8: Статистические характеристики интервалов времени между обращениями к топ-10 доменам
+
+top_domains_data <- dns_data_clean[dns_data_clean$query %in% top_10_domains$query, ]
+top_domains_data <- top_domains_data[order(top_domains_data$query, top_domains_data$timestamp), ]
+results <- data.frame(
+  Domain = character(),
+  Min = numeric(),
+  Q1 = numeric(),
+  Median = numeric(),
+  Mean = numeric(),
+  Q3 = numeric(),
+  Max = numeric()
+)
+for(domain in top_10_domains$query) {
+  domain_data <- top_domains_data[top_domains_data$query == domain, ]
+  domain_data <- domain_data[!is.na(domain_data$timestamp), ]
+  
+  if(nrow(domain_data) > 1) {
+    time_diffs <- diff(as.numeric(domain_data$timestamp))
+    domain_stats <- summary(time_diffs)
+    results <- rbind(results, data.frame(
+      Domain = domain,
+      Min = as.numeric(domain_stats["Min."]),
+      Q1 = as.numeric(domain_stats["1st Qu."]),
+      Median = as.numeric(domain_stats["Median"]),
+      Mean = as.numeric(domain_stats["Mean"]),
+      Q3 = as.numeric(domain_stats["3rd Qu."]),
+      Max = as.numeric(domain_stats["Max."])
+    ))
+  }
+}
+results
+```
+
+```{r}
+# Задача 9: Поиск IP-адресов с периодическими запросами на один домен (из топ-10 доменов)
+top_domains <- top_10_domains$query
+periodic_analysis <- data.frame(
+  source_ip = character(),
+  domain = character(),
+  request_count = integer(),
+  avg_interval = numeric(),
+  std_dev = numeric(),
+  is_periodic = logical()
+)
+for(domain in top_domains) {
+  domain_data <- dns_data_clean[dns_data_clean$query == domain, ]
+  domain_data <- domain_data[!is.na(domain_data$timestamp), ]
+  unique_ips <- unique(domain_data$source_ip)
+  for(ip in unique_ips) {
+    ip_data <- domain_data[domain_data$source_ip == ip, ]
+    if(nrow(ip_data) >= 5) {
+      ip_data <- ip_data[order(ip_data$timestamp), ]
+      timestamps <- as.numeric(ip_data$timestamp)
+      intervals <- diff(timestamps)
+      avg_interval <- mean(intervals)
+      std_dev <- sd(intervals)
+      # Критерий периодичности: низкое стандартное отклонение относительно среднего
+      is_periodic <- std_dev < avg_interval * 0.5
+      periodic_analysis <- rbind(periodic_analysis, data.frame(
+        source_ip = ip,
+        domain = domain,
+        request_count = nrow(ip_data),
+        avg_interval = avg_interval,
+        std_dev = std_dev,
+        is_periodic = is_periodic
+      ))
+    }
+  }
+}
+suspicious_ips <- periodic_analysis[periodic_analysis$is_periodic == TRUE, ] %>%
+  as_tibble()
+suspicious_ips
+```
+
+```{r}
+# Задача 9: Определите местоположение (страну, город) и организацию-провайдера для топ-10 доменов.
+get_geo_info <- function(ip) {
+  if (is.na(ip) || ip == "") {
+     return(tibble(
+      ip_address = NA_character_,
+      country = "IP не определён",
+      city = "IP не определён",
+      isp = "IP не определён"
+    ))
+  }
+  if (grepl("^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.)", ip)) {
+    return(tibble(
+      ip_address = ip,
+      country = "Частный IP",
+      city = "Частный IP",
+      isp = "Частный IP"
+    ))
+  }
+  url <- paste0("http://ip-api.com/json/", ip)
+  response <- GET(url)
+  if (status_code(response) == 200) {
+    data <- fromJSON(content(response, "text"))
+    if (data$status == "success") {
+      return(tibble(
+        ip_address = ip,
+        country = data$country,
+        city = data$city,
+        isp = data$isp
+      ))
+    } else {
+      return(tibble(
+        ip_address = ip,
+        country = paste("API ошибка:", data$status),
+        city = paste("API ошибка:", data$status),
+        isp = paste("API ошибка:", data$status)
+      ))
+    }
+  } else {
+    return(tibble(
+      ip_address = ip,
+      country = "Ошибка API",
+      city = "Ошибка API",
+      isp = "Ошибка API"
+    ))
+  }
+}
+
+dns_with_dest_ip <- dns_data_clean %>%
+  filter(!is.na(destination_ip)) %>%
+  select(query, destination_ip) %>%
+  distinct()
+relevant_dns <- dns_with_dest_ip %>%
+  filter(query %in% top_10_domains$query)
+geo_results_df <- tibble(
+  ip_address = character(),
+  country = character(),
+  city = character(),
+  isp = character()
+)
+#Запросы к API
+unique_ips_to_check <- unique(relevant_dns$destination_ip)
+for (ip in unique_ips_to_check) {
+  geo_info_row <- get_geo_info(ip)
+  geo_results_df <- bind_rows(geo_results_df, geo_info_row)
+}
+domain_geo_info_final <- relevant_dns %>%
+  left_join(geo_results_df, by = c("destination_ip" = "ip_address")) %>%
+  rename(ip_address = destination_ip) %>%
+  select(domain = query, ip_address, country, city, isp)
+domain_order_factor <- factor(domain_geo_info_final$domain, levels = top_10_domains$query)
+domain_geo_info_final_sorted <- domain_geo_info_final %>%
+  mutate(domain_order = domain_order_factor) %>%
+  arrange(domain_order) %>%
+  select(-domain_order)
+
+# Вывод результата, группируя по домену
+print(domain_geo_info_final_sorted)
+```
+
+## Оценка результата
+
+В рамках практческой работы была исследована подозрительная сетевая активность во внутренней сети Доброй
+Организации. Были восстановлены недостающие метаданные и подготовлены ответы на вопросы.
+
+## Вывод
+
+Таким мобразом в ходе работы мы зекрепили практические навыки использования языка программирования R для обработки данных, знания основных функций обработки данных экосистемы tidyverse языка R и навыки исследования метаданных DNS трафика
+
