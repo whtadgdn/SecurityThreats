@@ -59,12 +59,33 @@ install.packages("nycflights13")
 install.packages("dplyr")
 library(nycflights13)
 library(dplyr)
+Устанавливаю пакет в ‘C:/Users/Zid4a/AppData/Local/R/win-library/4.5’
+(потому что ‘lib’ не определено)
+Скачанные бинарные пакеты находятся в
+	C:\Users\Zid4a\AppData\Local\Temp\RtmpIlUEIH\downloaded_packages
+Устанавливаю пакет в ‘C:/Users/Zid4a/AppData/Local/R/win-library/4.5’
+(потому что ‘lib’ не определено)
+Скачанные бинарные пакеты находятся в
+	C:\Users\Zid4a\AppData\Local\Temp\RtmpIlUEIH\downloaded_packages
+	Присоединяю пакет: ‘dplyr’
+
+Следующие объекты скрыты от ‘package:stats’:
+
+    filter, lag
+
+Следующие объекты скрыты от ‘package:base’:
+
+    intersect, setdiff, setequal, union
 ```
 
 ### 1. Сколько встроенных в пакет nycflights13 датафреймов?
 
 ```r
 length(data(package = "nycflights13")$results[, "Item"])
+
+```
+```r
+[1] 5
 ```
 
 ### 2. Сколько строк в каждом датафрейме?
@@ -74,11 +95,21 @@ data_list <- data(package = "nycflights13")$results[, "Item"]
 sapply(data_list, function(x) nrow(get(x)))
 ```
 
+```r
+airlines airports  flights   planes  weather 
+      16     1458   336776     3322    26115
+```
+
 ### 3. Сколько столбцов в каждом датафрейме?
 
 ```r
 data_list <- data(package = "nycflights13")$results[, "Item"]
 sapply(data_list, function(x) ncol(get(x)))
+```
+
+```r
+airlines airports  flights   planes  weather 
+       2        8       19        9       15 
 ```
 
 ### 4. Как просмотреть примерный вид датафрейма?
@@ -87,10 +118,26 @@ sapply(data_list, function(x) ncol(get(x)))
 head(airlines)
 ```
 
+```r
+# A tibble: 6 × 2
+  carrier name                    
+  <chr>   <chr>                   
+1 9E      Endeavor Air Inc.       
+2 AA      American Airlines Inc.  
+3 AS      Alaska Airlines Inc.    
+4 B6      JetBlue Airways         
+5 DL      Delta Air Lines Inc.    
+6 EV      ExpressJet Airlines Inc.
+```
+
 ### 5. Сколько компаний-перевозчиков (carrier) учитывают эти наборы данных (представлено в наборах данных)?
 
 ```r
 length(unique(airlines$carrier))
+```
+
+```r
+[1] 16
 ```
 
 ### 6. Сколько рейсов принял аэропорт John F Kennedy Intl в мае?
@@ -99,16 +146,28 @@ length(unique(airlines$carrier))
 nrow(flights[flights$dest == "JFK" & flights$month == 5, ])
 ```
 
+```r
+[1] 0
+```
+
 ### 7. Какой самый северный аэропорт?
 
 ```r
 airports[which.max(airports$lat), ] %>% pull(name)
 ```
 
+```r
+[1] "Dillant Hopkins Airport"
+```
+
 ### 8. Какой аэропорт самый высокогорный (находится выше всех над уровнем моря)?
 
 ```r
 airports[which.max(airports$alt), ] %>% pull(name)
+```
+
+```r
+[1] "Telluride"
 ```
 
 ### 9. Какие бортовые номера у самых старых самолетов?
@@ -121,6 +180,22 @@ head(10) %>%
 select(year, tailnum)
 ```
 
+```r
+# A tibble: 10 × 2
+    year tailnum
+   <int> <chr>  
+ 1  1956 N381AA 
+ 2  1959 N201AA 
+ 3  1959 N567AA 
+ 4  1963 N378AA 
+ 5  1963 N575AA 
+ 6  1965 N14629 
+ 7  1967 N615AA 
+ 8  1968 N425AA 
+ 9  1972 N383AA 
+10  1973 N364AA
+```
+
 ### 10. Какая средняя температура воздуха была в сентябре в аэропорту John F Kennedy Intl (в градусах Цельсия).
 
 ```r
@@ -128,6 +203,10 @@ weather %>%
   filter(origin == "JFK", month == 9) %>%
   summarise(mean_temp_c = (mean(temp, na.rm = TRUE) - 32)* 5/9) %>%
   pull(mean_temp_c)
+```
+
+```r
+[1] 19.38764
 ```
 
 ### 11. Самолеты какой авиакомпании совершили больше всего вылетов в июне? Данные i2z1.ddslab.ru 3
@@ -139,6 +218,10 @@ flights %>%
   slice_max(n, n = 1) %>%
   left_join(airlines, by = "carrier") %>%
   pull(name)
+```
+
+```r
+[1] 19.38764
 ```
 
 ### 12. Самолеты какой авиакомпании задерживались чаще других в 2013 году?
@@ -153,6 +236,10 @@ flights %>%
             delay_ratio = delayed_flights / total_flights) %>%
   arrange(desc(delay_ratio)) %>%
   left_join(airlines, by = "carrier")
+```
+
+```r
+[1] "United Air Lines Inc."
 ```
 
 ## Оценка результата
