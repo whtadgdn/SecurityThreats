@@ -101,7 +101,7 @@ starwars
 
 ### Анализ датасета и ответы на вопросы
 
-####Сколько строк в датафрейме?
+#### Сколько строк в датафрейме?
 
 ```r
 nrow(starwars)
@@ -141,23 +141,23 @@ starwars %>% distinct(species) %>% nrow()
 ```
 [1] 38
 
-####Найти самого высокого персонажа.
+#### Найти самого высокого персонажа.
 
 ```r
 starwars %>% filter(height == max(height, na.rm = TRUE))
 ```
-# A tibble: 1 × 14
+ A tibble: 1 × 14
   name        height  mass hair_color skin_color eye_color birth_year sex   gender   homeworld species films
   <chr>        <int> <dbl> <chr>      <chr>      <chr>          <dbl> <chr> <chr>    <chr>     <chr>   <lis>
 1 Yarael Poof    264    NA none       white      yellow            NA male  masculi… Quermia   Quermi… <chr>
-# ℹ 2 more variables: vehicles <list>, starships <list>
+ ℹ 2 more variables: vehicles <list>, starships <list>
 
-###Найти всех персонажей ниже 170
+### Найти всех персонажей ниже 170
 
 ```r
 starwars %>% filter(height < 170)
 ```
-# A tibble: 22 × 14
+ A tibble: 22 × 14
    name         height  mass hair_color skin_color eye_color birth_year sex   gender homeworld species films
    <chr>         <int> <dbl> <chr>      <chr>      <chr>          <dbl> <chr> <chr>  <chr>     <chr>   <lis>
  1 C-3PO           167    75 NA         gold       yellow           112 none  mascu… Tatooine  Droid   <chr>
@@ -178,7 +178,7 @@ starwars %>% filter(height < 170)
 +     mutate(BMI = mass / ( (height/100)^2 )) %>%
 +     select(name, height, mass, BMI)
 ```
-# A tibble: 87 × 4
+ A tibble: 87 × 4
    name               height  mass   BMI
    <chr>               <int> <dbl> <dbl>
  1 Luke Skywalker        172    77  26.0
@@ -191,8 +191,8 @@ starwars %>% filter(height < 170)
  8 R5-D4                  97    32  34.0
  9 Biggs Darklighter     183    84  25.1
 10 Obi-Wan Kenobi        182    77  23.2
-# ℹ 77 more rows
-# ℹ Use `print(n = ...)` to see more rows
+ ℹ 77 more rows
+ ℹ Use `print(n = ...)` to see more rows
 
 #### Найти 10 самых “вытянутых” персонажей. “Вытянутость” оценить по отношению массы (mass) к росту (height) персонажей.
 
@@ -203,7 +203,7 @@ starwars %>% filter(height < 170)
 +     select(name, mass, height, ratio) %>%
 +     head(10)
 ```
-# A tibble: 10 × 4
+ A tibble: 10 × 4
    name                   mass height ratio
    <chr>                 <dbl>  <int> <dbl>
  1 Jabba Desilijic Tiure  1358    175 7.76 
@@ -227,7 +227,7 @@ starwars %>%
  summarise(average_age = mean(age),count = n()) %>%
  arrange(desc(average_age))
 ```
-# A tibble: 15 × 3
+ A tibble: 15 × 3
    species        average_age count
    <chr>                <dbl> <int>
  1 Yoda's species        996      1
@@ -267,7 +267,7 @@ starwars %>%
   summarise(avg_name_length = mean(name_length, na.rm = TRUE),count = n()) %>%
   arrange(desc(avg_name_length))
 ```
-# A tibble: 37 × 3
+ A tibble: 37 × 3
    species   avg_name_length count
    <chr>               <dbl> <int>
  1 Ewok                 21       1
@@ -280,7 +280,7 @@ starwars %>%
  8 Cerean               12       1
  9 Gungan               11.7     3
 10 Human                11.3    35
-# ℹ 27 more rows
+ ℹ 27 more rows
 ```r
 install.packages("dplyr")
 library(dplyr)
