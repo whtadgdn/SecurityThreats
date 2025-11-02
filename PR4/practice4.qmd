@@ -38,7 +38,6 @@ http://ip-api.com/json).
 ### 1. Импорт данных
 ```{r}
 # Загрузка и распаковка данных
-options(repos = c(CRAN = "https://mirror.truenetwork.ru/CRAN/"))
 install.packages("dplyr")
 install.packages("tidyverse")
 install.packages("jsonlite")
