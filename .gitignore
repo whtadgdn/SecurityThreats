@@ -2,3 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+# Large data files
+PR6/*.json
+PR6/*.csv
+PR6/*.tar.gz
+PR6/caldera_attack_evals_*
