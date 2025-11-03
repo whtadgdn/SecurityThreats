@@ -1,0 +1,395 @@
+---
+title: "Исследование вредоносной активности в домене Windows"
+subtitle: "Отчет по практике 6"
+author: "Zid4a84@yandex.ru"
+format: 
+  md:
+    output-file: README.md
+---
+
+## Цель работы
+
+1. Закрепить навыки исследования данных журнала Windows Active Directory
+2. Изучить структуру журнала системы Windows Active Directory
+3. Зекрепить практические навыки использования языка программирования R для
+обработки данных
+4. Закрепить знания основных функций обработки данных экосистемы tidyverse
+языка R
+
+## Исходные данные
+
+1.  Программное обеспечение ОС Windows 11 Pro
+2.  RStudio
+3.  Интерпретатор языка R 4.5.1
+
+## План
+
+Используя язык R и среду разработки RstudioIDE, выполнить необходимые задания.
+
+## Шаги:
+
+### 1. Импорт данных
+```{r}
+library(jsonlite)
+library(dplyr)
+library(tidyr)
+library(xml2)
+library(rvest)
+download.file("https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz", 
+              destfile = "dataset.tar.gz")
+пробую URL 'https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz'
+Content type 'application/gzip' length 12608123 bytes (12.0 MB)
+downloaded 12.0 MB
+
+untar("dataset.tar.gz")
+cat("Файлы после распаковки:\n")
+Файлы после распаковки:
+print(list.files(recursive = TRUE))
+[1] "caldera_attack_evals_round1_day1_2019-10-20201108.json"
+[2] "cleaned_data.csv"                                      
+[3] "critical_events_summary.csv"                           
+[4] "dataset.tar.gz"                                        
+[5] "event_reference.csv"                                   
+[6] "events_by_computer.csv"                                
+[7] "practice6.qmd"                                         
+[8] "README.md"                                             
+[9] "top_events.csv"                                        
+json_files <- list.files(pattern = "\\.json$", recursive = TRUE, full.names = TRUE)
+cat("\nНайденные JSON файлы:\n")
+
+Найденные JSON файлы:
+print(json_files)
+[1] "./caldera_attack_evals_round1_day1_2019-10-20201108.json"
+if(length(json_files) > 0) {
+    json_data <- jsonlite::stream_in(file(json_files[1]))
+    cat("\nУспешно загружен файл:", json_files[1], "\n")
+} else {
+    stop("JSON файл не найден!")
+}
+opening file input connection.
+ Imported 101904 records. Simplifying...
+closing file input connection.
+
+Успешно загружен файл: ./caldera_attack_evals_round1_day1_2019-10-20201108.json 
+webpage_url <- "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/appendix-l--events-to-monitor"
+webpage <- xml2::read_html(webpage_url)
+event_df <- rvest::html_table(webpage)[[1]]
+```
+
+### Шаг 2: Подготовка данных
+```{r}
+glimpse(data_unnested)
+Rows: 101,904
+Columns: 34
+$ `@timestamp`         <chr> "2019-10-20T20:11:06.937Z", "2019-10-20T20:11:07.101Z", "2019-10-20T20:11:09…
+$ `@metadata_beat`     <chr> "winlogbeat", "winlogbeat", "winlogbeat", "winlogbeat", "winlogbeat", "winlo…
+$ `@metadata_type`     <chr> "_doc", "_doc", "_doc", "_doc", "_doc", "_doc", "_doc", "_doc", "_doc", "_do…
+$ `@metadata_version`  <chr> "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4…
+$ `@metadata_topic`    <chr> "winlogbeat", "winlogbeat", "winlogbeat", "winlogbeat", "winlogbeat", "winlo…
+$ event_created        <chr> "2019-10-20T20:11:09.988Z", "2019-10-20T20:11:09.988Z", "2019-10-20T20:11:11…
+$ event_kind           <chr> "event", "event", "event", "event", "event", "event", "event", "event", "eve…
+$ event_code           <int> 4703, 4673, 10, 10, 10, 10, 11, 10, 10, 10, 10, 7, 7, 7, 4689, 10, 5, 4703, …
+$ event_action         <chr> "Token Right Adjusted Events", "Sensitive Privilege Use", "Process accessed …
+$ log_level            <chr> "information", "information", "information", "information", "information", "…
+$ message              <chr> "A token right was adjusted.\n\nSubject:\n\tSecurity ID:\t\tS-1-5-18\n\tAcco…
+$ winlog_event_data    <df[,234]> <data.frame[35 x 234]>
+$ winlog_event_id      <int> 4703, 4673, 10, 10, 10, 10, 11, 10, 10, 10, 10, 7, 7, 7, 4689, 10, 5, 4…
+$ winlog_provider_name <chr> "Microsoft-Windows-Security-Auditing", "Microsoft-Windows-Security-Auditing"…
+$ winlog_api           <chr> "wineventlog", "wineventlog", "wineventlog", "wineventlog", "wineventlog", "…
+$ winlog_record_id     <int> 50588, 104875, 226649, 153525, 163488, 153526, 134651, 226650, 226651, 22665…
+$ winlog_computer_name <chr> "HR001.shire.com", "HFDC01.shire.com", "IT001.shire.com", "HR001.shire.com",…
+$ winlog_process       <df[,2]> <data.frame[35 x 2]>
+$ winlog_keywords      <list> "Audit Success", "Audit Failure", <NULL>, <NULL>, <NULL>, <NULL>, <NULL>, <N…
+$ winlog_provider_guid <chr> "{54849625-5478-4994-a5ba-3e3b0328c30d}", "{54849625-5478-4994-a5ba-3e3b0…
+$ winlog_channel       <chr> "security", "Security", "Microsoft-Windows-Sysmon/Operational", "Microsoft-…
+$ winlog_task          <chr> "Token Right Adjusted Events", "Sensitive Privilege Use", "Process accessed …
+$ winlog_opcode        <chr> "Info", "Info", "Info", "Info", "Info", "Info", "Info", "Info", "Info", "Inf…
+$ winlog_version       <int> NA, NA, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, NA, 3, 3, NA, 3, 3, 3, 3, NA, 1,…
+$ winlog_user          <df[,4]> <data.frame[35 x 4]>
+$ winlog_activity_id   <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+$ winlog_user_data     <df[,30]> <data.frame[35 x 30]>
+$ ecs_version          <chr> "1.1.0", "1.1.0", "1.1.0", "1.1.0", "1.1.0", "1.1.0", "1.1.0", "1.1.0", "1.1…
+$ host_name            <chr> "WECServer", "WECServer", "WECServer", "WECServer", "WECServer", "WECServ…
+$ agent_ephemeral_id   <chr> "b372be1f-ba0a-4d7e-b4df-79eac86e1fde", "b372be1f-ba0a-4d7e-b4df-79eac86e1fd…
+$ agent_hostname       <chr> "WECServer", "WECServer", "WECServer", "WECServer", "WECServer", "WECSer…
+$ agent_id             <chr> "d347d9a4-bff4-476c-b5a4-d51119f78250", "d347d9a4-bff4-476c-b5a4-d51119f7825…
+$ agent_version        <chr> "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4…
+$ agent_type           <chr> "winlogbeat", "winlogbeat", "winlogbeat", "winlogbeat", "winlogbeat", "winlo…
+data_clean <- data_unnested %>%
++     select(where(~n_distinct(.) > 1))
+cat("Количество колонок после очистки:", ncol(data_clean), "\n")
+Количество колонок после очистки: 21 
+```
+### # Шаг 3: Количество хостов
+```{r}
+host_columns <- names(data_clean)[grepl("computer|host|hostname", 
+                                          names(data_clean), 
+                                          ignore.case = TRUE)]
+
+if(length(host_columns) > 0) {
+  hosts_count <- data_clean %>%
+    select(all_of(host_columns[1])) %>%
+    distinct() %>%
+    nrow()
+  
+  cat("Количество уникальных хостов:", hosts_count, "\n")
+} else {
+  cat("Колонка с хостами не найдена автоматически\n")
+}
+Количество уникальных хостов: 5 
+```
+
+### Шаг 4: Подготовка датафрейма с расшифровкой Event_ID
+```{r}
+event_df_clean <- event_df %>%
+  rename_all(~gsub(" ", "_", .)) %>%
+  mutate(across(everything(), as.character))
+cat("\nСтруктура справочника событий:\n")
+glimpse(event_df_clean)
+Rows: 381
+Columns: 4
+$ Current_Windows_Event_ID <chr> "4618", "4649", "4719", "4765", "4766", "4794", "4897", "4964", "5124", …
+$ Legacy_Windows_Event_ID  <chr> "N/A", "N/A", "612", "N/A", "N/A", "N/A", "801", "N/A", "N/A", "550", "5…
+$ Potential_Criticality    <chr> "High", "High", "High", "High", "High", "High", "High", "High", "High", …
+$ Event_Summary            <chr> "A monitored security event pattern has occurred.", "A replay attack was…
+cat("\nПервые строки справочника:\n")
+print(head(event_df_clean))
+# A tibble: 6 × 4
+  Current_Windows_Event_ID Legacy_Windows_Event_ID Potential_Criticality Event_Summary                     
+  <chr>                    <chr>                   <chr>                 <chr>                             
+1 4618                     N/A                     High                  A monitored security event patter…
+2 4649                     N/A                     High                  A replay attack was detected. May…
+3 4719                     612                     High                  System audit policy was changed.  
+4 4765                     N/A                     High                  SID History was added to an accou…
+5 4766                     N/A                     High                  An attempt to add SID History to …
+6 4794                     N/A                     High                  An attempt was made to set the Di…
+event_id_col <- names(event_df_clean)[grepl("Event.*ID|ID", names(event_df_clean), ignore.case = TRUE)][1]
+if(!is.na(event_id_col)) {
+    event_df_clean <- event_df_clean %>%
+        mutate(Event_ID = as.integer(gsub("[^0-9]", "", .data[[event_id_col]])))
+    cat("\nИспользуется колонка:", event_id_col, "\n")
+} else {
+    cat("\nВнимание: колонка Event_ID не найдена автоматически\n")
+}
+
+Используется колонка: Current_Windows_Event_ID 
+glimpse(event_df_clean)
+Rows: 381
+Columns: 5
+$ Current_Windows_Event_ID <chr> "4618", "4649", "4719", "4765", "4766", "4794", "4897", "4964", "5124", …
+$ Legacy_Windows_Event_ID  <chr> "N/A", "N/A", "612", "N/A", "N/A", "N/A", "801", "N/A", "N/A", "550", "5…
+$ Potential_Criticality    <chr> "High", "High", "High", "High", "High", "High", "High", "High", "High", …
+$ Event_Summary            <chr> "A monitored security event pattern has occurred.", "A replay attack was…
+$ Event_ID                 <int> 4618, 4649, 4719, 4765, 4766, 4794, 4897, 4964, 5124, NA, 1102, 4621, 46…
+```
+### Шаг 5: События с высоким и средним уровнем значимости
+```{r}
+eventid_columns <- names(data_clean)[grepl("event.*id|eventid", 
+                                             names(data_clean), 
+                                             ignore.case = TRUE)]
+if(length(eventid_columns) > 0) {
+    data_with_criticality <- data_clean %>%
+        mutate(EventID = as.integer(.[[eventid_columns[1]]])) %>%
+        left_join(event_df_clean, by = c("EventID" = "Event_ID"))
+    
+    criticality_summary <- data_with_criticality %>%
+        group_by(Potential_Criticality) %>%
+        summarise(count = n()) %>%
+        arrange(desc(count))
+    
+    print("Распределение событий по уровням критичности:")
+    print(criticality_summary)
+
+high_medium_events <- data_with_criticality %>%
+    filter(Potential_Criticality %in% c("High", "Medium"))
+cat("\nКоличество событий с высоким и средним уровнем значимости:", 
+    nrow(high_medium_events), "\n")
+
+} else {
+    cat("Колонка с Event_ID не найдена автоматически\n")
+}
+[1] "Распределение событий по уровням критичности:"
+# A tibble: 2 × 2
+  Potential_Criticality count
+  <chr>                 <int>
+1 NA                    99468
+2 Low                    2436
+
+Количество событий с высоким и средним уровнем значимости: 0 
+ cat("\n=== АНАЛИЗ ПОДОЗРИТЕЛЬНОЙ АКТИВНОСТИ ===\n\n")
+
+=== АНАЛИЗ ПОДОЗРИТЕЛЬНОЙ АКТИВНОСТИ ===
+
+cat("Топ-10 самых частых Event ID:\n")
+Топ-10 самых частых Event ID:
+top_events <- data_clean %>%
+    count(event_code, sort = TRUE) %>%
+    head(10)
+print(top_events)
+# A tibble: 10 × 2
+   event_code     n
+        <int> <int>
+ 1         10 36074
+ 2        800 12342
+ 3       4103 12166
+ 4       4105 11456
+ 5       4106 11456
+ 6         12  6354
+ 7          7  5937
+ 8       4703   809
+ 9       5156   756
+10          3   582
+cat("\n\nРаспределение событий по компьютерам:\n")
+
+
+Распределение событий по компьютерам:
+events_by_computer <- data_clean %>%
+    count(winlog_computer_name, sort = TRUE)
+print(events_by_computer)
+# A tibble: 5 × 2
+  winlog_computer_name     n
+  <chr>                <int>
+1 IT001.shire.com      96296
+2 HFDC01.shire.com      2063
+3 HR001.shire.com       1730
+4 ACCT001.shire.com     1504
+5 FILE001.shire.com      311
+cat("\n\nКритичные события безопасности:\n")
+
+
+Критичные события безопасности:
+critical_event_ids <- c(
+    4624, # Успешный вход
+    4625, # Неудачный вход
+    4720, # Создание учетной записи
+    4722, # Включение учетной записи
+    4728, # Добавление в группу безопасности
+    4732, # Добавление в локальную группу
+    4756, # Добавление в универсальную группу
+    4672, # Назначение специальных привилегий
+    4648  # Попытка входа с явными учетными данными
+)
+critical_events <- data_clean %>%
+    filter(event_code %in% critical_event_ids) %>%
+    count(event_code, event_action, sort = TRUE)
+print(critical_events)
+# A tibble: 2 × 3
+  event_code event_action      n
+       <int> <chr>         <int>
+1       4624 Logon            73
+2       4672 Special Logon    53
+cat("\n\nАнализ временного распределения событий:\n")
+
+
+Анализ временного распределения событий:
+data_with_time <- data_clean %>%
+    mutate(timestamp = as.POSIXct(`@timestamp`, format = "%Y-%m-%dT%H:%M:%OS", tz = "UTC"),
+           hour = format(timestamp, "%H"),
+           date = as.Date(timestamp))
+
+events_by_hour <- data_with_time %>%
+    count(hour, sort = TRUE) %>%
+    head(10)
+cat("События по часам (топ-10):\n")
+События по часам (топ-10):
+print(events_by_hour)
+# A tibble: 1 × 2
+  hour       n
+  <chr>  <int>
+1 20    101904
+cat("\n\nПоиск подозрительных паттернов:\n")
+
+
+Поиск подозрительных паттернов:
+failed_logins <- data_clean %>%
+    filter(event_code == 4625)
+cat("Количество неудачных попыток входа (Event ID 4625):", nrow(failed_logins), "\n")
+Количество неудачных попыток входа (Event ID 4625): 0 
+new_users <- data_clean %>%
+    filter(event_code == 4720)
+cat("Количество созданий новых пользователей (Event ID 4720):", nrow(new_users), "\n")
+Количество созданий новых пользователей (Event ID 4720): 0 
+special_privileges <- data_clean %>%
+    filter(event_code == 4672)
+cat("Назначение специальных привилегий (Event ID 4672):", nrow(special_privileges), "\n")
+Назначение специальных привилегий (Event ID 4672): 53 
+cat("\n\nСохранение результатов...\n")
+
+
+Сохранение результатов...
+data_to_save <- data_clean %>%
+    select(where(~!is.data.frame(.) && !is.list(.)))
+write.csv(data_to_save, "cleaned_data.csv", row.names = FALSE)
+write.csv(event_df_clean, "event_reference.csv", row.names = FALSE)
+write.csv(critical_events, "critical_events_summary.csv", row.names = FALSE)
+write.csv(top_events, "top_events.csv", row.names = FALSE)
+write.csv(events_by_computer, "events_by_computer.csv", row.names = FALSE)
+
+cat("\n=== ИТОГОВАЯ СТАТИСТИКА ===\n")
+
+=== ИТОГОВАЯ СТАТИСТИКА ===
+cat("Всего событий:", nrow(data_clean), "\n")
+Всего событий: 101904 
+cat("Уникальных компьютеров:", n_distinct(data_clean$winlog_computer_name), "\n")
+Уникальных компьютеров: 5 
+cat("Уникальных Event ID:", n_distinct(data_clean$event_code), "\n")
+Уникальных Event ID: 109 
+cat("Период наблюдения:", min(data_with_time$date), "до", max(data_with_time$date), "\n")
+Период наблюдения: 18189 до 18189 
+
+cat("\n=== АНАЛИЗ SYSMON СОБЫТИЙ ===\n")
+
+=== АНАЛИЗ SYSMON СОБЫТИЙ ===
+sysmon_events <- data_clean %>%
+   cat("\nEvent ID 10 (Process Access) - подозрительный доступ к процессам:\n")
+
+Event ID 10 (Process Access) - подозрительный доступ к процессам:
+process_access <- sysmon_events %>%
+    filter(event_code == 10) %>%
+    nrow()
+cat("Всего событий доступа к процессам:", process_access, "\n")
+Всего событий доступа к процессам: 36074 
+cat("\nEvent ID 3 (Network Connection) - сетевые подключения:\n")
+
+Event ID 3 (Network Connection) - сетевые подключения:
+network_conn <- sysmon_events %>%
+    filter(event_code == 3) %>%
+    nrow()
+cat("Всего сетевых подключений:", network_conn, "\n")
+Всего сетевых подключений: 582 
+cat("\nEvent ID 1 (Process Creation) - создание процессов:\n")
+
+Event ID 1 (Process Creation) - создание процессов:
+process_creation <- sysmon_events %>%
+    filter(event_code == 1) %>%
+    nrow()
+cat("Всего созданных процессов:", process_creation, "\n")
+Всего созданных процессов: 108 
+cat("\nEvent ID 1 (Process Creation) - создание процессов:\n")
+
+Event ID 1 (Process Creation) - создание процессов:
+process_creation <- sysmon_events %>%
+    filter(event_code == 1) %>%
+    nrow()
+cat("Всего созданных процессов:", process_creation, "\n")
+Всего созданных процессов: 108 
+cat("\n=== ВЫВОДЫ ===\n")
+
+=== ВЫВОДЫ ===
+cat("1. В логах обнаружено", nrow(data_clean), "событий с", n_distinct(data_clean$winlog_computer_name), "компьютеров\n")
+1. В логах обнаружено 101904 событий с 5 компьютеров
+cat("2. Наиболее активный хост: IT001.shire.com (", 
+    max(events_by_computer$n), "событий)\n")
+2. Наиболее активный хост: IT001.shire.com ( 96296 событий)
+cat("3. Обнаружено", nrow(critical_events), "типов критичных событий безопасности\n")
+3. Обнаружено 2 типов критичных событий безопасности
+cat("4. Успешных входов (4624):", 
+    sum(critical_events$n[critical_events$event_code == 4624]), "\n")
+4. Успешных входов (4624): 73 
+cat("5. Назначений специальных привилегий (4672):", 
+    sum(critical_events$n[critical_events$event_code == 4672]), "\n")
+5. Назначений специальных привилегий (4672): 53 
+
+cat("\nАнализ завершен! Результаты сохранены в файлы.\n")
+
+Анализ завершен! Результаты сохранены в файлы.
