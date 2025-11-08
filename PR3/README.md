@@ -177,7 +177,7 @@ planes %>%
 filter(!is.na(year)) %>%
 arrange(year) %>%
 head(10) %>%
-select(year, tailnum)
+select(tailnum, year)
 ```
 
 ```r
@@ -221,7 +221,7 @@ flights %>%
 ```
 
 ```r
-[1] 19.38764
+[1] "United Air Lines Inc."
 ```
 
 ### 12. Самолеты какой авиакомпании задерживались чаще других в 2013 году?
@@ -235,11 +235,31 @@ flights %>%
             total_flights = n(),
             delay_ratio = delayed_flights / total_flights) %>%
   arrange(desc(delay_ratio)) %>%
-  left_join(airlines, by = "carrier")
+  slice_max(delay_ratio, n = 1) %>%
+  left_join(airlines, by = "carrier") %>%
+  pull(name)
 ```
-
 ```r
-[1] "United Air Lines Inc."
+ A tibble: 16 × 5
+   carrier delayed_flights total_flights delay_ratio name                       
+   <chr>             <int>         <int>       <dbl> <chr>                      
+ 1 F9                  476           681       0.699 Frontier Airlines Inc.     
+ 2 FL                 2156          3175       0.679 AirTran Airways Corporation
+ 3 WN                 7546         12044       0.627 Southwest Airlines Co.     
+ 4 UA                32741         57782       0.567 United Air Lines Inc.      
+ 5 EV                28277         51108       0.553 ExpressJet Airlines Inc.   
+ 6 YV                  292           544       0.537 Mesa Airlines Inc.         
+ 7 VX                 2745          5116       0.537 Virgin America             
+ 8 B6                28545         54049       0.528 JetBlue Airways            
+ 9 MQ                12715         25037       0.508 Envoy Air                  
+10 9E                 8562         17294       0.495 Endeavor Air Inc.          
+11 DL                21473         47658       0.451 Delta Air Lines Inc.       
+12 AA                14143         31947       0.443 American Airlines Inc.     
+13 US                 8346         19831       0.421 US Airways Inc.            
+14 AS                  289           709       0.408 Alaska Airlines Inc.       
+15 OO                   11            29       0.379 SkyWest Airlines Inc.      
+16 HA                  129           342       0.377 Hawaiian Airlines Inc. 
+[1] "Frontier Airlines Inc."
 ```
 
 ## Оценка результата

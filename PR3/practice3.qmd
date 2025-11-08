@@ -123,7 +123,7 @@ planes %>%
 filter(!is.na(year)) %>%
 arrange(year) %>%
 head(10) %>%
-select(year, tailnum)
+select(tailnum, year)
 ```
 
 ### 10. Какая средняя температура воздуха была в сентябре в аэропорту John F Kennedy Intl (в градусах Цельсия).
@@ -157,7 +157,9 @@ flights %>%
             total_flights = n(),
             delay_ratio = delayed_flights / total_flights) %>%
   arrange(desc(delay_ratio)) %>%
-  left_join(airlines, by = "carrier")
+  slice_max(delay_ratio, n = 1) %>%
+  left_join(airlines, by = "carrier") %>%
+  pull(name)
 ```
 
 ## Оценка результата
