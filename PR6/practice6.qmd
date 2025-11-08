@@ -188,22 +188,24 @@ eventid_columns <- names(data_clean)[grepl("event.*id|eventid",
                                              names(data_clean), 
                                              ignore.case = TRUE)]
 if(length(eventid_columns) > 0) {
-    data_with_criticality <- data_clean %>%
-        mutate(EventID = as.integer(.[[eventid_columns[1]]])) %>%
-        left_join(event_df_clean, by = c("EventID" = "Event_ID"))
-    
-    criticality_summary <- data_with_criticality %>%
-        group_by(Potential_Criticality) %>%
-        summarise(count = n()) %>%
-        arrange(desc(count))
-    
-    print("Распределение событий по уровням критичности:")
-    print(criticality_summary)
-
-high_medium_events <- data_with_criticality %>%
-    filter(Potential_Criticality %in% c("High", "Medium"))
-cat("\nКоличество событий с высоким и средним уровнем значимости:", 
-    nrow(high_medium_events), "\n")
+  data_with_criticality <- data_clean %>%
+      left_join(event_df_clean, by = c("event_code" = "Event_ID"))
+  
+  criticality_summary <- data_with_criticality %>%
+      filter(!is.na(Potential_Criticality)) %>%  # Убираем NA
+      group_by(Potential_Criticality) %>%
+      summarise(count = n()) %>%
+      arrange(desc(count))
+  
+  print("Распределение событий по уровням критичности:")
+  print(criticality_summary)
+  
+  # Высокие и средние
+  high_medium_events <- data_with_criticality %>%
+      filter(Potential_Criticality %in% c("High", "Medium"))
+  
+  cat("\nКоличество событий с высоким и средним уровнем значимости:", 
+      nrow(high_medium_events), "\n")
 
 } else {
     cat("Колонка с Event_ID не найдена автоматически\n")
