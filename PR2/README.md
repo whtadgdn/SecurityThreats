@@ -178,21 +178,23 @@ R4-P17	96
 #### Подсчитать ИМТ (индекс массы тела) для всех персонажей. ИМТ подсчитать по формулe$I=\frac{m}{h^2}$, где 𝑚 – масса (weight), а ℎ – рост (height).
 
 ```{r}
-starwars %>% mutate("BMI" = mass/(height*height)) %>% select(name,BMI)
+starwars %>%
+  mutate(height_m = height / 100,bmi = mass / (height_m)^2) %>%
+  select(name, mass, height, bmi)
 ```
- A tibble: 87 × 2
-   name                   BMI
-   <chr>                <dbl>
- 1 Luke Skywalker     0.00260
- 2 C-3PO              0.00269
- 3 R2-D2              0.00347
- 4 Darth Vader        0.00333
- 5 Leia Organa        0.00218
- 6 Owen Lars          0.00379
- 7 Beru Whitesun Lars 0.00275
- 8 R5-D4              0.00340
- 9 Biggs Darklighter  0.00251
-10 Obi-Wan Kenobi     0.00232
+ A tibble: 87 × 4
+   name                mass height   bmi
+   <chr>              <dbl>  <int> <dbl>
+ 1 Luke Skywalker        77    172  26.0
+ 2 C-3PO                 75    167  26.9
+ 3 R2-D2                 32     96  34.7
+ 4 Darth Vader          136    202  33.3
+ 5 Leia Organa           49    150  21.8
+ 6 Owen Lars            120    178  37.9
+ 7 Beru Whitesun Lars    75    165  27.5
+ 8 R5-D4                 32     97  34.0
+ 9 Biggs Darklighter     84    183  25.1
+10 Obi-Wan Kenobi        77    182  23.2
  ℹ 77 more rows
 
 #### Найти 10 самых “вытянутых” персонажей. “Вытянутость” оценить по отношению массы (mass) к росту (height) персонажей.
@@ -217,23 +219,31 @@ starwars %>% mutate(Stretching = mass/height)  %>% arrange(desc(Stretching)) %>%
 #### Найти средний возраст персонажей каждой расы вселенной Звездных войн.
 
 ```{r}
-starwars %>% filter(!is.na(species) & !is.na(birth_year)) %>% group_by(species) %>% summarise(average_age = mean(birth_year, na.rm = TRUE)) %>% knitr::kable()
+starwars %>%
+ mutate(current_year = 100,age = current_year + birth_year) %>%
+ filter(!is.na(age) & !is.na(species)) %>%
+ group_by(species) %>%
+ summarise(average_age = mean(age),count = n()) %>%
+ arrange(desc(average_age))
 ```
-  Cerean	92.00000
-  Droid	53.33333
-  Ewok	8.00000
-  Gungan	52.00000
-  Human	53.74231
-  Hutt	600.00000
-  Kel Dor	22.00000
-  Mirialan	49.00000
-  Mon Calamari	41.00000
-  Rodian	44.00000
-  Trandoshan	53.00000
-  Twi’lek	48.00000
-  Wookiee	200.00000
-  Yoda’s species	896.00000
-  Zabrak	54.00000
+ A tibble: 15 × 3
+   species        average_age count
+   <chr>                <dbl> <int>
+ 1 Yoda's species        996      1
+ 2 Hutt                  700      1
+ 3 Wookiee               300      1
+ 4 Cerean                192      1
+ 5 Zabrak                154      1
+ 6 Human                 154.    26
+ 7 Droid                 153.     3
+ 8 Trandoshan            153      1
+ 9 Gungan                152      1
+10 Mirialan              149      2
+11 Twi'lek               148      1
+12 Rodian                144      1
+13 Mon Calamari          141      1
+14 Kel Dor               122      1
+15 Ewok                  108      1
 
 #### Найти самый распространенный цвет глаз персонажей вселенной Звездных войн.
 
@@ -246,47 +256,25 @@ starwars %>% filter(!is.na(eye_color)) %>% group_by(eye_color) %>% summarise(cou
 #### Подсчитать среднюю длину имени в каждой расе вселенной Звездных войн.
 
 ```{r}
-starwars %>% filter(!is.na(species) & !is.na(name)) %>% mutate(name_length = nchar(name)) %>% group_by(species) %>% summarise(len = mean(name_length, na.rm = TRUE)) %>% knitr::kable()
+starwars %>%
+  mutate(name_length = nchar(name)) %>%
+  filter(!is.na(species)) %>%
+  group_by(species) %>%
+  summarise(avg_name_length = mean(name_length, na.rm = TRUE),count = n()) %>%
+  arrange(desc(avg_name_length))
 ```
-  species	len
-  Aleena	12.000000
-  Besalisk	15.000000
-  Cerean	12.000000
-  Chagrian	10.000000
-  Clawdite	10.000000
-  Droid	4.833333
-  Dug	7.000000
-  Ewok	21.000000
-  Geonosian	17.000000
-  Gungan	11.666667
-  Human	11.342857
-  Hutt	21.000000
-  Iktotchi	11.000000
-  Kaleesh	8.000000
-  Kaminoan	7.000000
-  Kel Dor	8.000000
-  Mirialan	14.000000
-  Mon Calamari	6.000000
-  Muun	8.000000
-  Nautolan	9.000000
-  Neimodian	11.000000
-  Pau’an	10.000000
-  Quermian	11.000000
-  Rodian	6.000000
-  Skakoan	10.000000
-  Sullustan	9.000000
-  Tholothian	10.000000
-  Togruta	8.000000
-  Toong	14.000000
-  Toydarian	5.000000
-  Trandoshan	5.000000
-  Twi’lek	11.000000
-  Vulptereen	8.000000
-  Wookiee	8.000000
-  Xexto	7.000000
-  Yoda’s species	4.000000
-  Zabrak	9.500000
-```{r}
-install.packages("dplyr")
-library(dplyr)
-```
+ A tibble: 37 × 3
+   species   avg_name_length count
+   <chr>               <dbl> <int>
+ 1 Ewok                 21       1
+ 2 Hutt                 21       1
+ 3 Geonosian            17       1
+ 4 Besalisk             15       1
+ 5 Mirialan             14       2
+ 6 Toong                14       1
+ 7 Aleena               12       1
+ 8 Cerean               12       1
+ 9 Gungan               11.7     3
+10 Human                11.3    35
+ ℹ 27 more rows
+ 
