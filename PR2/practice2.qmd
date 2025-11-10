@@ -51,7 +51,7 @@ format:
 
 ---
 ### Установка пакета dplyr, загрузка датасета.
-```r
+```{r}
 install.packages("dplyr")
 WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
 
@@ -67,10 +67,10 @@ downloaded 1.5 MB
 Скачанные бинарные пакеты находятся в
 	C:\Users\Zid4a\AppData\Local\Temp\RtmpKaM0Jo\downloaded_packages
 ```
-```r
+```{r}
  library(dplyr)
 ```
-```r
+```{r}
 Присоединяю пакет: ‘dplyr’
 
 Следующие объекты скрыты от ‘package:stats’:
@@ -103,19 +103,19 @@ starwars
 
 #### Сколько строк в датафрейме?
 
-```r
+```{r}
 nrow(starwars)
 ```
 [1] 87
 
 #### Сколько столбцов в датафрейме?
-```r
+```{r}
 starwars %>% ncol()
 ```
 [1] 14
 
 #### Как просмотреть примерный вид датафрейма?
-```r
+```{r}
 starwars %>% glimpse()
 ```
 Rows: 87
@@ -136,14 +136,14 @@ $ vehicles   <list> <"Snowspeeder", "Imperial Speeder Bike">, <>, <>, <>, "Imper
 $ starships  <list> <"X-wing", "Imperial shuttle">, <>, <>, "TIE Advanced x1", <>, <>, <>, <>, "X-wing", <…
 
 ### Сколько уникальных рас персонажей (species) представлено в данных?
-```r
+```{r}
 starwars$species %>% unique() %>% length()
 ```
 [1] 38
 
 #### Найти самого высокого персонажа.
 
-```r
+```{r}
 starwars %>% arrange(desc(height)) %>% head(1) %>% select(name)
 ```
  A tibble: 1 × 1
@@ -153,7 +153,7 @@ starwars %>% arrange(desc(height)) %>% head(1) %>% select(name)
 
 ### Найти всех персонажей ниже 170
 
-```r
+```{r}
 starwars %>% filter(!is.na(height) & height < 170) %>% select(name,height) %>% knitr::kable()
 ```
 name	height
@@ -182,7 +182,7 @@ R4-P17	96
 
 #### Подсчитать ИМТ (индекс массы тела) для всех персонажей. ИМТ подсчитать по формулe$I=\frac{m}{h^2}$, где 𝑚 – масса (weight), а ℎ – рост (height).
 
-```r
+```{r}
 starwars %>% mutate("BMI" = mass/(height*height)) %>% select(name,BMI)
 ```
  A tibble: 87 × 2
@@ -202,7 +202,7 @@ starwars %>% mutate("BMI" = mass/(height*height)) %>% select(name,BMI)
 
 #### Найти 10 самых “вытянутых” персонажей. “Вытянутость” оценить по отношению массы (mass) к росту (height) персонажей.
 
-```r
+```{r}
 starwars %>% mutate(Stretching = mass/height)  %>% arrange(desc(Stretching)) %>% head(10) %>% select(name,Stretching) 
 ```
  A tibble: 10 × 2
@@ -221,7 +221,7 @@ starwars %>% mutate(Stretching = mass/height)  %>% arrange(desc(Stretching)) %>%
 
 #### Найти средний возраст персонажей каждой расы вселенной Звездных войн.
 
-```r
+```{r}
 starwars %>% filter(!is.na(species) & !is.na(birth_year)) %>% group_by(species) %>% summarise(average_age = mean(birth_year, na.rm = TRUE)) %>% knitr::kable()
 ```
   Cerean	92.00000
@@ -242,7 +242,7 @@ starwars %>% filter(!is.na(species) & !is.na(birth_year)) %>% group_by(species) 
 
 #### Найти самый распространенный цвет глаз персонажей вселенной Звездных войн.
 
-```r
+```{r}
 starwars %>% filter(!is.na(eye_color)) %>% group_by(eye_color) %>% summarise(count = n()) %>% arrange(desc(count)) %>% slice(1) %>% knitr::kable()
 ```
   eye_color	count
@@ -250,7 +250,7 @@ starwars %>% filter(!is.na(eye_color)) %>% group_by(eye_color) %>% summarise(cou
 
 #### Подсчитать среднюю длину имени в каждой расе вселенной Звездных войн.
 
-```r
+```{r}
 starwars %>% filter(!is.na(species) & !is.na(name)) %>% mutate(name_length = nchar(name)) %>% group_by(species) %>% summarise(len = mean(name_length, na.rm = TRUE)) %>% knitr::kable()
 ```
   species	len
@@ -291,7 +291,7 @@ starwars %>% filter(!is.na(species) & !is.na(name)) %>% mutate(name_length = nch
   Xexto	7.000000
   Yoda’s species	4.000000
   Zabrak	9.500000
-```r
+```{r}
 install.packages("dplyr")
 library(dplyr)
 ```
