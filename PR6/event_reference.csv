@@ -380,3 +380,12 @@
 "24621","N/A","Low","Initial state check: Rolling volume conversion transaction on %2.",24621
 "5049","N/A","Low","An IPsec Security Association was deleted.",5049
 "5478","N/A","Low","IPsec Services has started successfully.",5478
+NA,NA,"High","Process creation",1
+NA,NA,"Medium","Network connection",3
+NA,NA,"Medium","Image loaded",7
+NA,NA,"High","Process access",10
+NA,NA,"High","File created",11
+NA,NA,"Medium","Registry modification",12
+NA,NA,"Medium","Registry object added/deleted",13
+NA,NA,"High","Pipe created",17
+NA,NA,"High","Pipe connected",18

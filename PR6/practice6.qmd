@@ -173,6 +173,7 @@ if(!is.na(event_id_col)) {
 }
 
 Используется колонка: Current_Windows_Event_ID 
+
 glimpse(event_df_clean)
 Rows: 381
 Columns: 5
@@ -181,43 +182,63 @@ $ Legacy_Windows_Event_ID  <chr> "N/A", "N/A", "612", "N/A", "N/A", "N/A", "801"
 $ Potential_Criticality    <chr> "High", "High", "High", "High", "High", "High", "High", "High", "High", …
 $ Event_Summary            <chr> "A monitored security event pattern has occurred.", "A replay attack was…
 $ Event_ID                 <int> 4618, 4649, 4719, 4765, 4766, 4794, 4897, 4964, 5124, NA, 1102, 4621, 46…
+sysmon_manual <- data.frame(
+  Event_ID = c(1, 3, 7, 10, 11, 12, 13, 17, 18),
+  Potential_Criticality = c("High", "Medium", "Medium", "High", "High", "Medium", "Medium", "High", "High"),
+  Event_Summary = c(
+    "Process creation",
+    "Network connection",
+    "Image loaded",
+    "Process access",
+    "File created",
+    "Registry modification",
+    "Registry object added/deleted",
+    "Pipe created",
+    "Pipe connected"
+  ),
+  stringsAsFactors = FALSE
+)
+
+event_df_clean <- bind_rows(event_df_clean, sysmon_manual)
+
+cat("\nДобавлены Sysmon события:", nrow(sysmon_manual), "шт.\n")
+cat("Теперь в справочнике событий:", nrow(event_df_clean), "строк.\n")
 ```
 ### Шаг 5: События с высоким и средним уровнем значимости
 ```{r}
-eventid_columns <- names(data_clean)[grepl("event.*id|eventid", 
-                                             names(data_clean), 
-                                             ignore.case = TRUE)]
-if(length(eventid_columns) > 0) {
-  data_with_criticality <- data_clean %>%
-      left_join(event_df_clean, by = c("event_code" = "Event_ID"))
-  
-  criticality_summary <- data_with_criticality %>%
-      filter(!is.na(Potential_Criticality)) %>%  # Убираем NA
-      group_by(Potential_Criticality) %>%
-      summarise(count = n()) %>%
-      arrange(desc(count))
-  
-  print("Распределение событий по уровням критичности:")
-  print(criticality_summary)
-  
-  # Высокие и средние
-  high_medium_events <- data_with_criticality %>%
-      filter(Potential_Criticality %in% c("High", "Medium"))
-  
-  cat("\nКоличество событий с высоким и средним уровнем значимости:", 
-      nrow(high_medium_events), "\n")
-
+if("event_code" %in% names(data_clean)) {
+    data_with_criticality <- data_clean %>%
+        mutate(EventID = as.integer(event_code)) %>%
+        left_join(event_df_clean, by = c("EventID" = "Event_ID"))
+    
+    criticality_summary <- data_with_criticality %>%
+        group_by(Potential_Criticality) %>%
+        summarise(count = n()) %>%
+        arrange(desc(count))
+    
+    print("Распределение событий по уровням критичности:")
+    print(criticality_summary)
+    
+    high_medium_events <- data_with_criticality %>%
+        filter(Potential_Criticality %in% c("High", "Medium"))
+    
+    cat("\nКоличество событий с высоким и средним уровнем значимости:", 
+        nrow(high_medium_events), "\n")
 } else {
-    cat("Колонка с Event_ID не найдена автоматически\n")
+    cat("Колонка с event_code не найдена\n")
 }
 [1] "Распределение событий по уровням критичности:"
-# A tibble: 2 × 2
+[1] "Распределение событий по уровням критичности:"
+# A tibble: 4 × 2
   Potential_Criticality count
   <chr>                 <int>
-1 NA                    99468
-2 Low                    2436
+1 NA                    49583
+2 High                  36601
+3 Medium                13284
+4 Low                    2436
 
-Количество событий с высоким и средним уровнем значимости: 0 
+Количество событий с высоким и средним уровнем значимости: 49885 
+
  cat("\n=== АНАЛИЗ ПОДОЗРИТЕЛЬНОЙ АКТИВНОСТИ ===\n\n")
 
 === АНАЛИЗ ПОДОЗРИТЕЛЬНОЙ АКТИВНОСТИ ===
@@ -330,68 +351,55 @@ write.csv(events_by_computer, "events_by_computer.csv", row.names = FALSE)
 cat("\n=== ИТОГОВАЯ СТАТИСТИКА ===\n")
 
 === ИТОГОВАЯ СТАТИСТИКА ===
-cat("Всего событий:", nrow(data_clean), "\n")
-Всего событий: 101904 
-cat("Уникальных компьютеров:", n_distinct(data_clean$winlog_computer_name), "\n")
-Уникальных компьютеров: 5 
-cat("Уникальных Event ID:", n_distinct(data_clean$event_code), "\n")
-Уникальных Event ID: 109 
-cat("Период наблюдения:", min(data_with_time$date), "до", max(data_with_time$date), "\n")
-Период наблюдения: 18189 до 18189 
+# === Итоговая статистика ===
+Всего_событий <- nrow(data_clean)
+Уникальных_компьютеров <- n_distinct(data_clean$winlog_computer_name)
+Уникальных_EventID <- n_distinct(data_clean$event_code)
+Период_начала <- min(data_with_time$date)
+Период_конца <- max(data_with_time$date)
 
-cat("\n=== АНАЛИЗ SYSMON СОБЫТИЙ ===\n")
+# === Анализ Sysmon событий ===
+sysmon_events <- data_clean
 
-=== АНАЛИЗ SYSMON СОБЫТИЙ ===
-sysmon_events <- data_clean %>%
-   cat("\nEvent ID 10 (Process Access) - подозрительный доступ к процессам:\n")
-
-Event ID 10 (Process Access) - подозрительный доступ к процессам:
 process_access <- sysmon_events %>%
     filter(event_code == 10) %>%
     nrow()
-cat("Всего событий доступа к процессам:", process_access, "\n")
-Всего событий доступа к процессам: 36074 
-cat("\nEvent ID 3 (Network Connection) - сетевые подключения:\n")
 
-Event ID 3 (Network Connection) - сетевые подключения:
 network_conn <- sysmon_events %>%
     filter(event_code == 3) %>%
     nrow()
-cat("Всего сетевых подключений:", network_conn, "\n")
-Всего сетевых подключений: 582 
-cat("\nEvent ID 1 (Process Creation) - создание процессов:\n")
 
-Event ID 1 (Process Creation) - создание процессов:
 process_creation <- sysmon_events %>%
     filter(event_code == 1) %>%
     nrow()
-cat("Всего созданных процессов:", process_creation, "\n")
-Всего созданных процессов: 108 
-cat("\nEvent ID 1 (Process Creation) - создание процессов:\n")
 
-Event ID 1 (Process Creation) - создание процессов:
-process_creation <- sysmon_events %>%
-    filter(event_code == 1) %>%
-    nrow()
-cat("Всего созданных процессов:", process_creation, "\n")
-Всего созданных процессов: 108 
-cat("\n=== ВЫВОДЫ ===\n")
+# === Критические события безопасности ===
+critical_event_ids <- c(4624, 4625, 4720, 4722, 4728, 4732, 4756, 4672, 4648)
 
-=== ВЫВОДЫ ===
-cat("1. В логах обнаружено", nrow(data_clean), "событий с", n_distinct(data_clean$winlog_computer_name), "компьютеров\n")
-1. В логах обнаружено 101904 событий с 5 компьютеров
-cat("2. Наиболее активный хост: IT001.shire.com (", 
-    max(events_by_computer$n), "событий)\n")
-2. Наиболее активный хост: IT001.shire.com ( 96296 событий)
-cat("3. Обнаружено", nrow(critical_events), "типов критичных событий безопасности\n")
-3. Обнаружено 2 типов критичных событий безопасности
-cat("4. Успешных входов (4624):", 
-    sum(critical_events$n[critical_events$event_code == 4624]), "\n")
-4. Успешных входов (4624): 73 
-cat("5. Назначений специальных привилегий (4672):", 
-    sum(critical_events$n[critical_events$event_code == 4672]), "\n")
-5. Назначений специальных привилегий (4672): 53 
+critical_events <- data_clean %>%
+    filter(event_code %in% critical_event_ids) %>%
+    count(event_code, event_action, sort = TRUE)
 
-cat("\nАнализ завершен! Результаты сохранены в файлы.\n")
+successful_logons <- sum(critical_events$n[critical_events$event_code == 4624])
+special_privileges <- sum(critical_events$n[critical_events$event_code == 4672])
 
-Анализ завершен! Результаты сохранены в файлы.
+# === Выводы ===
+вывод_1 <- paste("1. В логах обнаружено", Всего_событий, "событий с", Уникальных_компьютеров, "компьютеров")
+вывод_2 <- paste("2. Наиболее активный хост:", events_by_computer$winlog_computer_name[which.max(events_by_computer$n)],
+                 "(", max(events_by_computer$n), "событий)")
+вывод_3 <- paste("3. Обнаружено", nrow(critical_events), "типов критичных событий безопасности")
+вывод_4 <- paste("4. Успешных входов (4624):", successful_logons)
+вывод_5 <- paste("5. Назначений специальных привилегий (4672):", special_privileges)
+
+# === Вывод на экран ===
+print(вывод_1)
+print(вывод_2)
+print(вывод_3)
+print(вывод_4)
+print(вывод_5)
+
+[1] "1. В логах обнаружено 101904 событий с 5 компьютеров"
+[1] "2. Наиболее активный хост: IT001.shire.com ( 96296 событий)"
+[1] "3. Обнаружено 2 типов критичных событий безопасности"
+[1] "4. Успешных входов (4624): 73"
+[1] "5. Назначений специальных привилегий (4672): 53"
