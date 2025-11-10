@@ -139,151 +139,153 @@ starwars$species %>% unique() %>% length()
 #### Найти самого высокого персонажа.
 
 ```r
-starwars %>%
-  select(name,height) %>%
-  arrange(desc(height)) %>%
-  head(1)
+starwars %>% arrange(desc(height)) %>% head(1) %>% select(name)
 ```
- A tibble: 87 × 2
-   name               height
-   <chr>               <int>
- 1 Luke Skywalker        172
- 2 C-3PO                 167
- 3 R2-D2                  96
- 4 Darth Vader           202
- 5 Leia Organa           150
- 6 Owen Lars             178
- 7 Beru Whitesun Lars    165
- 8 R5-D4                  97
- 9 Biggs Darklighter     183
-10 Obi-Wan Kenobi        182
- ℹ 77 more rows
- ℹ Use `print(n = ...)` to see more rows
+ A tibble: 1 × 1
+  name       
+  <chr>      
+1 Yarael Poof
 
 ### Найти всех персонажей ниже 170
 
 ```r
-starwars %>% filter(height < 170)
+starwars %>% filter(!is.na(height) & height < 170) %>% select(name,height) %>% knitr::kable()
 ```
- A tibble: 22 × 14
-   name         height  mass hair_color skin_color eye_color birth_year sex   gender homeworld species films
-   <chr>         <int> <dbl> <chr>      <chr>      <chr>          <dbl> <chr> <chr>  <chr>     <chr>   <lis>
- 1 C-3PO           167    75 NA         gold       yellow           112 none  mascu… Tatooine  Droid   <chr>
- 2 R2-D2            96    32 NA         white, bl… red               33 none  mascu… Naboo     Droid   <chr>
- 3 Leia Organa     150    49 brown      light      brown             19 fema… femin… Alderaan  Human   <chr>
- 4 Beru Whites…    165    75 brown      light      blue              47 fema… femin… Tatooine  Human   <chr>
- 5 R5-D4            97    32 NA         white, red red               NA none  mascu… Tatooine  Droid   <chr>
- 6 Yoda             66    17 white      green      brown            896 male  mascu… NA        Yoda's… <chr>
- 7 Mon Mothma      150    NA auburn     fair       blue              48 fema… femin… Chandrila Human   <chr>
- 8 Wicket Syst…     88    20 brown      brown      brown              8 male  mascu… Endor     Ewok    <chr>
- 9 Nien Nunb       160    68 none       grey       black             NA male  mascu… Sullust   Sullus… <chr>
-10 Watto           137    NA black      blue, grey yellow            NA male  mascu… Toydaria  Toydar… <chr>
+name	height
+C-3PO	167
+R2-D2	96
+Leia Organa	150
+Beru Whitesun Lars	165
+R5-D4	97
+Yoda	66
+Mon Mothma	150
+Wicket Systri Warrick	88
+Nien Nunb	160
+Watto	137
+Sebulba	112
+Shmi Skywalker	163
+Ratts Tyerel	79
+Dud Bolt	94
+Gasgano	122
+Ben Quadinaros	163
+Cordé	157
+Barriss Offee	166
+Dormé	165
+Zam Wesell	168
+Jocasta Nu	167
+R4-P17	96
 
 #### Подсчитать ИМТ (индекс массы тела) для всех персонажей. ИМТ подсчитать по формулe$I=\frac{m}{h^2}$, где 𝑚 – масса (weight), а ℎ – рост (height).
 
 ```r
- starwars %>%
-+     mutate(BMI = mass / ( (height/100)^2 )) %>%
-+     select(name, height, mass, BMI)
+starwars %>% mutate("BMI" = mass/(height*height)) %>% select(name,BMI)
 ```
- A tibble: 87 × 4
-   name               height  mass   BMI
-   <chr>               <int> <dbl> <dbl>
- 1 Luke Skywalker        172    77  26.0
- 2 C-3PO                 167    75  26.9
- 3 R2-D2                  96    32  34.7
- 4 Darth Vader           202   136  33.3
- 5 Leia Organa           150    49  21.8
- 6 Owen Lars             178   120  37.9
- 7 Beru Whitesun Lars    165    75  27.5
- 8 R5-D4                  97    32  34.0
- 9 Biggs Darklighter     183    84  25.1
-10 Obi-Wan Kenobi        182    77  23.2
+ A tibble: 87 × 2
+   name                   BMI
+   <chr>                <dbl>
+ 1 Luke Skywalker     0.00260
+ 2 C-3PO              0.00269
+ 3 R2-D2              0.00347
+ 4 Darth Vader        0.00333
+ 5 Leia Organa        0.00218
+ 6 Owen Lars          0.00379
+ 7 Beru Whitesun Lars 0.00275
+ 8 R5-D4              0.00340
+ 9 Biggs Darklighter  0.00251
+10 Obi-Wan Kenobi     0.00232
  ℹ 77 more rows
- ℹ Use `print(n = ...)` to see more rows
 
 #### Найти 10 самых “вытянутых” персонажей. “Вытянутость” оценить по отношению массы (mass) к росту (height) персонажей.
 
 ```r
- starwars %>%
-+     mutate(ratio = mass / height) %>%
-+     arrange(desc(ratio)) %>%
-+     select(name, mass, height, ratio) %>%
-+     head(10)
+starwars %>% mutate(Stretching = mass/height)  %>% arrange(desc(Stretching)) %>% head(10) %>% select(name,Stretching) 
 ```
- A tibble: 10 × 4
-   name                   mass height ratio
-   <chr>                 <dbl>  <int> <dbl>
- 1 Jabba Desilijic Tiure  1358    175 7.76 
- 2 Grievous                159    216 0.736
- 3 IG-88                   140    200 0.7  
- 4 Owen Lars               120    178 0.674
- 5 Darth Vader             136    202 0.673
- 6 Jek Tono Porkins        110    180 0.611
- 7 Bossk                   113    190 0.595
- 8 Tarfful                 136    234 0.581
- 9 Dexter Jettster         102    198 0.515
-10 Chewbacca               112    228 0.491
+ A tibble: 10 × 2
+   name                  Stretching
+   <chr>                      <dbl>
+ 1 Jabba Desilijic Tiure      7.76 
+ 2 Grievous                   0.736
+ 3 IG-88                      0.7  
+ 4 Owen Lars                  0.674
+ 5 Darth Vader                0.673
+ 6 Jek Tono Porkins           0.611
+ 7 Bossk                      0.595
+ 8 Tarfful                    0.581
+ 9 Dexter Jettster            0.515
+10 Chewbacca                  0.491
 
 #### Найти средний возраст персонажей каждой расы вселенной Звездных войн.
 
 ```r
-starwars %>%
-  group_by(species) %>%
-  summarise(avg_birth_year = mean(birth_year, na.rm = TRUE))
+starwars %>% filter(!is.na(species) & !is.na(birth_year)) %>% group_by(species) %>% summarise(average_age = mean(birth_year, na.rm = TRUE)) %>% knitr::kable()
 ```
- A tibble: 38 × 2
-   species   avg_birth_year
-   <chr>              <dbl>
- 1 Aleena             NaN  
- 2 Besalisk           NaN  
- 3 Cerean              92  
- 4 Chagrian           NaN  
- 5 Clawdite           NaN  
- 6 Droid               53.3
- 7 Dug                NaN  
- 8 Ewok                 8  
- 9 Geonosian          NaN  
-10 Gungan              52  
- ℹ 28 more rows
- ℹ Use `print(n = ...)` to see more rows
+  Cerean	92.00000
+  Droid	53.33333
+  Ewok	8.00000
+  Gungan	52.00000
+  Human	53.74231
+  Hutt	600.00000
+  Kel Dor	22.00000
+  Mirialan	49.00000
+  Mon Calamari	41.00000
+  Rodian	44.00000
+  Trandoshan	53.00000
+  Twi’lek	48.00000
+  Wookiee	200.00000
+  Yoda’s species	896.00000
+  Zabrak	54.00000
 
 #### Найти самый распространенный цвет глаз персонажей вселенной Звездных войн.
 
 ```r
-starwars %>%
-  count(eye_color, sort = TRUE) %>%
-  head(1)
+starwars %>% filter(!is.na(eye_color)) %>% group_by(eye_color) %>% summarise(count = n()) %>% arrange(desc(count)) %>% slice(1) %>% knitr::kable()
 ```
- A tibble: 1 × 2
- eye_color     n
- <chr>     <int>
-1 brown        21
+  eye_color	count
+  brown	21
 
 #### Подсчитать среднюю длину имени в каждой расе вселенной Звездных войн.
 
 ```r
-starwars %>%
-  mutate(name_length = nchar(name)) %>%
-  filter(!is.na(species)) %>%
-  group_by(species) %>%
-  summarise(avg_name_length = mean(name_length, na.rm = TRUE),count = n()) %>%
-  arrange(desc(avg_name_length))
+starwars %>% filter(!is.na(species) & !is.na(name)) %>% mutate(name_length = nchar(name)) %>% group_by(species) %>% summarise(len = mean(name_length, na.rm = TRUE)) %>% knitr::kable()
 ```
- A tibble: 37 × 3
-   species   avg_name_length count
-   <chr>               <dbl> <int>
- 1 Ewok                 21       1
- 2 Hutt                 21       1
- 3 Geonosian            17       1
- 4 Besalisk             15       1
- 5 Mirialan             14       2
- 6 Toong                14       1
- 7 Aleena               12       1
- 8 Cerean               12       1
- 9 Gungan               11.7     3
-10 Human                11.3    35
- ℹ 27 more rows
+  species	len
+  Aleena	12.000000
+  Besalisk	15.000000
+  Cerean	12.000000
+  Chagrian	10.000000
+  Clawdite	10.000000
+  Droid	4.833333
+  Dug	7.000000
+  Ewok	21.000000
+  Geonosian	17.000000
+  Gungan	11.666667
+  Human	11.342857
+  Hutt	21.000000
+  Iktotchi	11.000000
+  Kaleesh	8.000000
+  Kaminoan	7.000000
+  Kel Dor	8.000000
+  Mirialan	14.000000
+  Mon Calamari	6.000000
+  Muun	8.000000
+  Nautolan	9.000000
+  Neimodian	11.000000
+  Pau’an	10.000000
+  Quermian	11.000000
+  Rodian	6.000000
+  Skakoan	10.000000
+  Sullustan	9.000000
+  Tholothian	10.000000
+  Togruta	8.000000
+  Toong	14.000000
+  Toydarian	5.000000
+  Trandoshan	5.000000
+  Twi’lek	11.000000
+  Vulptereen	8.000000
+  Wookiee	8.000000
+  Xexto	7.000000
+  Yoda’s species	4.000000
+  Zabrak	9.500000
 ```r
 install.packages("dplyr")
 library(dplyr)
