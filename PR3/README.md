@@ -26,134 +26,91 @@ Zid4a84@yandex.ru
 
 ## Шаги
 
-### Установка пакета nycflights13
+### Установка nycflights13
+> install.packages('nycflights13')
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
 
-```r
-install.packages("nycflights13")
-install.packages("dplyr")
+https://cran.rstudio.com/bin/windows/Rtools/
+Устанавливаю пакет в ‘C:/Users/Zid4a/AppData/Local/R/win-library/4.5’
+(потому что ‘lib’ не определено)
+пробую URL 'https://cran.rstudio.com/bin/windows/contrib/4.5/nycflights13_1.0.2.zip'
+Content type 'application/zip' length 4511548 bytes (4.3 MB)
+downloaded 4.3 MB
+
+пакет ‘nycflights13’ успешно распакован, MD5-суммы проверены
+
+Скачанные бинарные пакеты находятся в
+	C:\Users\Zid4a\AppData\Local\Temp\RtmpOU8nnE\downloaded_packages
+
+
+### Подключение пакетов
+```{r}
 library(nycflights13)
 library(dplyr)
-```
+```	
 
-### 1. Сколько встроенных в пакет nycflights13 датафреймов?
-
+### Сколько встроенных в пакет nycflights13 датафреймов?
 ```{r}
-length(data(package = "nycflights13")$results[, "Item"])
+length(ls("package:nycflights13"))
 ```
+
+
+### Сколько строк в каждом датафрейме?
 ```{r}
-[1] 5
+sapply(ls("package:nycflights13"), function(df) nrow(get(df, "package:nycflights13")))
 ```
-
-### 2. Сколько строк в каждом датафрейме?
-
+      
+### Сколько столбцов в каждом датафрейме?
 ```{r}
-data_list <- data(package = "nycflights13")$results[, "Item"]
-sapply(data_list, function(x) nrow(get(x)))
+sapply(ls("package:nycflights13"), function(df) ncol(get(df, "package:nycflights13")))
 ```
 
+
+### Как просмотреть примерный вид датафрейма?
 ```{r}
-airlines airports  flights   planes  weather 
-      16     1458   336776     3322    26115 
+glimpse(airlines)
 ```
 
-### 3. Сколько столбцов в каждом датафрейме?
 
+### Сколько компаний-перевозчиков (carrier) учитывают эти наборы данных (представлено в наборах данных)?
 ```{r}
-data_list <- data(package = "nycflights13")$results[, "Item"]
-sapply(data_list, function(x) ncol(get(x)))
+length(unique(nycflights13::flights$carrier))
 ```
 
+
+### Сколько рейсов принял аэропорт John F Kennedy Intl в мае?
 ```{r}
-airlines airports  flights   planes  weather 
-       2        8       19        9       15 
+nycflights13::flights %>%
+      filter(dest == "JFK", month == 5) %>%
+      summarise(flights_count = n())
 ```
 
-### 4. Как просмотреть примерный вид датафрейма?
 
+### Какой самый северный аэропорт?
 ```{r}
-head(airlines)
+nycflights13::airports %>%
+      filter(lat == max(lat, na.rm = TRUE))
 ```
 
+
+### Какой аэропорт самый высокогорный (находится выше всех над уровнем моря)?
 ```{r}
- A tibble: 6 × 2
-  carrier name                    
-  <chr>   <chr>                   
-1 9E      Endeavor Air Inc.       
-2 AA      American Airlines Inc.  
-3 AS      Alaska Airlines Inc.    
-4 B6      JetBlue Airways         
-5 DL      Delta Air Lines Inc.    
-6 EV      ExpressJet Airlines Inc.
+airports %>%
+  filter(alt == max(alt, na.rm = TRUE))
 ```
 
-### 5. Сколько компаний-перевозчиков (carrier) учитывают эти наборы данных (представлено в наборах данных)?
 
-```{r}
-length(unique(airlines$carrier))
-```
-
-```{r}
-[1] 16
-```
-
-### 6. Сколько рейсов принял аэропорт John F Kennedy Intl в мае?
-
-```{r}
-nrow(flights[flights$dest == "JFK" & flights$month == 5, ])
-```
-
-```{r}
-[1] 0
-```
-
-### 7. Какой самый северный аэропорт?
-
-```{r}
-airports[which.max(airports$lat), ] %>% pull(name)
-```
-
-```{r}
-[1] "Dillant Hopkins Airport"
-```
-
-### 8. Какой аэропорт самый высокогорный (находится выше всех над уровнем моря)?
-
-```{r}
-airports[which.max(airports$alt), ] %>% pull(name)
-```
-
-```{r}
-[1] "Telluride"
-```
-
-### 9. Какие бортовые номера у самых старых самолетов?
-
+### Какие бортовые номера у самых старых самолетов?
 ```{r}
 planes %>%
-filter(!is.na(year)) %>%
-arrange(year) %>%
-head(10) %>%
-select(year, tailnum)
+  filter(!is.na(year)) %>%
+  arrange(year) %>%
+  select(tailnum, year) %>%
+  head(10)
 ```
 
-```{r}
- A tibble: 10 × 2
-    year tailnum
-   <int> <chr>  
- 1  1956 N381AA 
- 2  1959 N201AA 
- 3  1959 N567AA 
- 4  1963 N378AA 
- 5  1963 N575AA 
- 6  1965 N14629 
- 7  1967 N615AA 
- 8  1968 N425AA 
- 9  1972 N383AA 
-10  1973 N364AA 
-```
 
-### 10. Какая средняя температура воздуха была в сентябре в аэропорту John F Kennedy Intl (в градусах Цельсия).
-
+### Какая средняя температура воздуха была в сентябре в аэропорту John F Kennedy Intl (в градусах Цельсия).
 ```{r}
 weather %>%
   filter(origin == "JFK", month == 9) %>%
@@ -161,59 +118,37 @@ weather %>%
   pull(mean_temp_c)
 ```
 
+
+### Самолеты какой авиакомпании совершили больше всего вылетов в июне?
 ```{r}
-[1] 19.38764
-```
+june_flights <- flights %>%
+  filter(month == 6)
 
-### 11. Самолеты какой авиакомпании совершили больше всего вылетов в июне? Данные i2z1.ddslab.ru 3
-
-```{r}
-flights %>%
-  filter(month == 6) %>%
-  count(carrier, sort = TRUE) %>%
-  slice_max(n, n = 1) %>%
-  left_join(airlines, by = "carrier") %>%
-  pull(name)
-```
-
-```{r}
-[1] "United Air Lines Inc."
-```
-
-### 12. Самолеты какой авиакомпании задерживались чаще других в 2013 году?
-
-```{r}
-flights %>%
-  filter(!is.na(dep_delay) & !is.na(arr_delay)) %>%
-  mutate(delayed = dep_delay > 0 | arr_delay > 0) %>%
+# 2) посчитать вылеты по каждому перевозчику
+carrier_counts <- june_flights %>%
   group_by(carrier) %>%
-  summarise(delayed_flights = sum(delayed),
-            total_flights = n(),
-            delay_ratio = delayed_flights / total_flights) %>%
-  arrange(desc(delay_ratio)) %>%
-  left_join(airlines, by = "carrier")
+  summarise(departures = n()) %>%
+  arrange(desc(departures))
+
+# 3) вывести лидера(-ей)
+top_carriers <- head(carrier_counts, n = 1)
+
+top_carriers
 ```
 
+
+### Самолеты какой авиакомпании задерживались чаще других в 2013 году?
 ```{r}
- A tibble: 16 × 5
-   carrier delayed_flights total_flights delay_ratio name                       
-   <chr>             <int>         <int>       <dbl> <chr>                      
- 1 F9                  476           681       0.699 Frontier Airlines Inc.     
- 2 FL                 2156          3175       0.679 AirTran Airways Corporation
- 3 WN                 7546         12044       0.627 Southwest Airlines Co.     
- 4 UA                32741         57782       0.567 United Air Lines Inc.      
- 5 EV                28277         51108       0.553 ExpressJet Airlines Inc.   
- 6 YV                  292           544       0.537 Mesa Airlines Inc.         
- 7 VX                 2745          5116       0.537 Virgin America             
- 8 B6                28545         54049       0.528 JetBlue Airways            
- 9 MQ                12715         25037       0.508 Envoy Air                  
-10 9E                 8562         17294       0.495 Endeavor Air Inc.          
-11 DL                21473         47658       0.451 Delta Air Lines Inc.       
-12 AA                14143         31947       0.443 American Airlines Inc.     
-13 US                 8346         19831       0.421 US Airways Inc.            
-14 AS                  289           709       0.408 Alaska Airlines Inc.       
-15 OO                   11            29       0.379 SkyWest Airlines Inc.      
-16 HA                  129           342       0.377 Hawaiian Airlines Inc.   
+library(nycflights13)
+library(dplyr)
+
+flights %>%
+  filter(year == 2013, dep_delay > 0) %>%          # задержки в 2013, dep_delay > 0 минут
+  group_by(carrier) %>%
+  summarise(mean_delays = mean(dep_delay, na.rm = TRUE),
+            count_delays = sum(dep_delay > 0)) %>%
+  arrange(desc(count_delays)) %>%
+  head(1)
 ```
 
 ## Оценка результата
