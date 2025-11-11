@@ -211,6 +211,9 @@ if("event_code" %in% names(data_clean)) {
         mutate(EventID = as.integer(event_code)) %>%
         left_join(event_df_clean, by = c("EventID" = "Event_ID"))
     
+    data_with_criticality <- data_with_criticality %>%
+    mutate(Potential_Criticality = ifelse(is.na(Potential_Criticality), "Medium",Potential_Criticality))
+    
     criticality_summary <- data_with_criticality %>%
         group_by(Potential_Criticality) %>%
         summarise(count = n()) %>%
