@@ -45,8 +45,8 @@ Zid4a84@yandex.ru
 ## Шаги
 
 ---
-### Установка пакета dplyr, загрузка датасета.
-```{r}
+### Установка dplyr
+
 install.packages("dplyr")
 WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
 
@@ -54,227 +54,105 @@ https://cran.rstudio.com/bin/windows/Rtools/
 Устанавливаю пакет в ‘C:/Users/Zid4a/AppData/Local/R/win-library/4.5’
 (потому что ‘lib’ не определено)
 пробую URL 'https://cran.rstudio.com/bin/windows/contrib/4.5/dplyr_1.1.4.zip'
-Content type 'application/zip' length 1593566 bytes (1.5 MB)
+Content type 'application/zip' length 1593482 bytes (1.5 MB)
 downloaded 1.5 MB
 
 пакет ‘dplyr’ успешно распакован, MD5-суммы проверены
 
 Скачанные бинарные пакеты находятся в
-	C:\Users\Zid4a\AppData\Local\Temp\RtmpKaM0Jo\downloaded_packages
-```
+	C:\Users\Zid4a\AppData\Local\Temp\RtmpOU8nnE\downloaded_packages
+
+
+### Подключение dplyr
 ```{r}
- library(dplyr)
-```
-```{r}
-Присоединяю пакет: ‘dplyr’
-
-Следующие объекты скрыты от ‘package:stats’:
-
-    filter, lag
-
-Следующие объекты скрыты от ‘package:base’:
-
-    intersect, setdiff, setequal, union
-starwars
-# A tibble: 87 × 14
-   name     height  mass hair_color skin_color eye_color birth_year sex   gender homeworld species films
-   <chr>     <int> <dbl> <chr>      <chr>      <chr>          <dbl> <chr> <chr>  <chr>     <chr>   <lis>
- 1 Luke Sk…    172    77 blond      fair       blue            19   male  mascu… Tatooine  Human   <chr>
- 2 C-3PO       167    75 NA         gold       yellow         112   none  mascu… Tatooine  Droid   <chr>
- 3 R2-D2        96    32 NA         white, bl… red             33   none  mascu… Naboo     Droid   <chr>
- 4 Darth V…    202   136 none       white      yellow          41.9 male  mascu… Tatooine  Human   <chr>
- 5 Leia Or…    150    49 brown      light      brown           19   fema… femin… Alderaan  Human   <chr>
- 6 Owen La…    178   120 brown, gr… light      blue            52   male  mascu… Tatooine  Human   <chr>
- 7 Beru Wh…    165    75 brown      light      blue            47   fema… femin… Tatooine  Human   <chr>
- 8 R5-D4        97    32 NA         white, red red             NA   none  mascu… Tatooine  Droid   <chr>
- 9 Biggs D…    183    84 black      light      brown           24   male  mascu… Tatooine  Human   <chr>
-10 Obi-Wan…    182    77 auburn, w… fair       blue-gray       57   male  mascu… Stewjon   Human   <chr>
-# ℹ 77 more rows
-# ℹ 2 more variables: vehicles <list>, starships <list>
-# ℹ Use `print(n = ...)` to see more rows
+library(dplyr)
 ```
 
-### Анализ датасета и ответы на вопросы
-
-#### Сколько строк в датафрейме?
-
+### Сколько строк в датафрейме?
 ```{r}
 nrow(starwars)
 ```
-[1] 87
 
-#### Сколько столбцов в датафрейме?
-```{r}
-starwars %>% ncol()
-```
-[1] 14
 
-#### Как просмотреть примерный вид датафрейма?
+### Сколько столбцов в датафрейме?
 ```{r}
-starwars %>% glimpse()
+ncol(starwars)
 ```
-Rows: 87
-Columns: 14
-$ name       <chr> "Luke Skywalker", "C-3PO", "R2-D2", "Darth Vader", "Leia Organa", "Owen Lars", "Beru Wh…
-$ height     <int> 172, 167, 96, 202, 150, 178, 165, 97, 183, 182, 188, 180, 228, 180, 173, 175, 170, 180,…
-$ mass       <dbl> 77.0, 75.0, 32.0, 136.0, 49.0, 120.0, 75.0, 32.0, 84.0, 77.0, 84.0, NA, 112.0, 80.0, 74…
-$ hair_color <chr> "blond", NA, NA, "none", "brown", "brown, grey", "brown", NA, "black", "auburn, white",…
-$ skin_color <chr> "fair", "gold", "white, blue", "white", "light", "light", "light", "white, red", "light…
-$ eye_color  <chr> "blue", "yellow", "red", "yellow", "brown", "blue", "blue", "red", "brown", "blue-gray"…
-$ birth_year <dbl> 19.0, 112.0, 33.0, 41.9, 19.0, 52.0, 47.0, NA, 24.0, 57.0, 41.9, 64.0, 200.0, 29.0, 44.…
-$ sex        <chr> "male", "none", "none", "male", "female", "male", "female", "none", "male", "male", "ma…
-$ gender     <chr> "masculine", "masculine", "masculine", "masculine", "feminine", "masculine", "feminine"…
-$ homeworld  <chr> "Tatooine", "Tatooine", "Naboo", "Tatooine", "Alderaan", "Tatooine", "Tatooine", "Tatoo…
-$ species    <chr> "Human", "Droid", "Droid", "Human", "Human", "Human", "Human", "Droid", "Human", "Human…
-$ films      <list> <"A New Hope", "The Empire Strikes Back", "Return of the Jedi", "Revenge of the Sith",…
-$ vehicles   <list> <"Snowspeeder", "Imperial Speeder Bike">, <>, <>, <>, "Imperial Speeder Bike", <>, <>,…
-$ starships  <list> <"X-wing", "Imperial shuttle">, <>, <>, "TIE Advanced x1", <>, <>, <>, <>, "X-wing", <…
+
+### Как просмотреть примерный вид датафрейма?
+```{r}
+glimpse(starwars)
+```
+
 
 ### Сколько уникальных рас персонажей (species) представлено в данных?
 ```{r}
-starwars$species %>% unique() %>% length()
+starwars %>% summarise(количество_уникальных_рас = n_distinct(species))
 ```
-[1] 38
 
-#### Найти самого высокого персонажа.
 
+### Найти самого высокого персонажа.
 ```{r}
-starwars %>% arrange(desc(height)) %>% head(1) %>% select(name)
+starwars %>%
+      filter(height == max(height, na.rm = TRUE))
 ```
- A tibble: 1 × 1
-  name       
-  <chr>      
-1 Yarael Poof
+
 
 ### Найти всех персонажей ниже 170
-
 ```{r}
-starwars %>% filter(!is.na(height) & height < 170) %>% select(name,height) %>% knitr::kable()
+starwars %>% filter(height < 170)
 ```
-name	height
-C-3PO	167
-R2-D2	96
-Leia Organa	150
-Beru Whitesun Lars	165
-R5-D4	97
-Yoda	66
-Mon Mothma	150
-Wicket Systri Warrick	88
-Nien Nunb	160
-Watto	137
-Sebulba	112
-Shmi Skywalker	163
-Ratts Tyerel	79
-Dud Bolt	94
-Gasgano	122
-Ben Quadinaros	163
-Cordé	157
-Barriss Offee	166
-Dormé	165
-Zam Wesell	168
-Jocasta Nu	167
-R4-P17	96
 
-#### Подсчитать ИМТ (индекс массы тела) для всех персонажей. ИМТ подсчитать по формулe$I=\frac{m}{h^2}$, где 𝑚 – масса (weight), а ℎ – рост (height).
 
+### Подсчитать ИМТ (индекс массы тела) для всех персонажей.
 ```{r}
 starwars %>%
-  mutate(height_m = height / 100,bmi = mass / (height_m)^2) %>%
-  select(name, mass, height, bmi)
+     mutate(height_m = height / 100,bmi = mass / (height_m)^2) %>%
+     select(name, mass, height, bmi)
 ```
- A tibble: 87 × 4
-   name                mass height   bmi
-   <chr>              <dbl>  <int> <dbl>
- 1 Luke Skywalker        77    172  26.0
- 2 C-3PO                 75    167  26.9
- 3 R2-D2                 32     96  34.7
- 4 Darth Vader          136    202  33.3
- 5 Leia Organa           49    150  21.8
- 6 Owen Lars            120    178  37.9
- 7 Beru Whitesun Lars    75    165  27.5
- 8 R5-D4                 32     97  34.0
- 9 Biggs Darklighter     84    183  25.1
-10 Obi-Wan Kenobi        77    182  23.2
- ℹ 77 more rows
 
-#### Найти 10 самых “вытянутых” персонажей. “Вытянутость” оценить по отношению массы (mass) к росту (height) персонажей.
 
+### Найти 10 самых “вытянутых” персонажей.“Вытянутость” оценить по отношению массы (mass) к росту (height) персонажей.
 ```{r}
-starwars %>% mutate(Stretching = mass/height)  %>% arrange(desc(Stretching)) %>% head(10) %>% select(name,Stretching) 
+ starwars %>% 
+     mutate(stretch_ratio = mass / height) %>% 
+     arrange(desc(stretch_ratio)) %>% 
+     slice_head(n = 10)
 ```
- A tibble: 10 × 2
-   name                  Stretching
-   <chr>                      <dbl>
- 1 Jabba Desilijic Tiure      7.76 
- 2 Grievous                   0.736
- 3 IG-88                      0.7  
- 4 Owen Lars                  0.674
- 5 Darth Vader                0.673
- 6 Jek Tono Porkins           0.611
- 7 Bossk                      0.595
- 8 Tarfful                    0.581
- 9 Dexter Jettster            0.515
-10 Chewbacca                  0.491
 
-#### Найти средний возраст персонажей каждой расы вселенной Звездных войн.
 
+### Найти средний возраст персонажей каждой расы вселенной Звездных войн.
 ```{r}
 starwars %>%
- mutate(current_year = 100,age = current_year + birth_year) %>%
- filter(!is.na(age) & !is.na(species)) %>%
- group_by(species) %>%
- summarise(average_age = mean(age),count = n()) %>%
- arrange(desc(average_age))
+     mutate(current_year = 100,age = current_year + birth_year) %>%
+     filter(!is.na(age) & !is.na(species)) %>%
+     group_by(species) %>%
+     summarise(average_age = mean(age),count = n()) %>%
+     arrange(desc(average_age))
 ```
- A tibble: 15 × 3
-   species        average_age count
-   <chr>                <dbl> <int>
- 1 Yoda's species        996      1
- 2 Hutt                  700      1
- 3 Wookiee               300      1
- 4 Cerean                192      1
- 5 Zabrak                154      1
- 6 Human                 154.    26
- 7 Droid                 153.     3
- 8 Trandoshan            153      1
- 9 Gungan                152      1
-10 Mirialan              149      2
-11 Twi'lek               148      1
-12 Rodian                144      1
-13 Mon Calamari          141      1
-14 Kel Dor               122      1
-15 Ewok                  108      1
 
-#### Найти самый распространенный цвет глаз персонажей вселенной Звездных войн.
 
+### Найти самый распространенный цвет глаз персонажей вселенной Звездных войн.
 ```{r}
-starwars %>% filter(!is.na(eye_color)) %>% group_by(eye_color) %>% summarise(count = n()) %>% arrange(desc(count)) %>% slice(1) %>% knitr::kable()
+starwars %>% 
+     filter(!is.na(eye_color)) %>% 
+     count(eye_color, sort = TRUE) %>% 
+     slice(1)
 ```
-  eye_color	count
-  brown	21
 
-#### Подсчитать среднюю длину имени в каждой расе вселенной Звездных войн.
 
+### Подсчитать среднюю длину имени в каждой расе вселенной Звездных войн.
 ```{r}
 starwars %>%
-  mutate(name_length = nchar(name)) %>%
-  filter(!is.na(species)) %>%
-  group_by(species) %>%
-  summarise(avg_name_length = mean(name_length, na.rm = TRUE),count = n()) %>%
-  arrange(desc(avg_name_length))
+     filter(!is.na(name) & !is.na(species)) %>%
+     group_by(species) %>%
+     summarise(average_name_length = mean(nchar(name)))
 ```
- A tibble: 37 × 3
-   species   avg_name_length count
-   <chr>               <dbl> <int>
- 1 Ewok                 21       1
- 2 Hutt                 21       1
- 3 Geonosian            17       1
- 4 Besalisk             15       1
- 5 Mirialan             14       2
- 6 Toong                14       1
- 7 Aleena               12       1
- 8 Cerean               12       1
- 9 Gungan               11.7     3
-10 Human                11.3    35
- ℹ 27 more rows
- 
+
+## Оценка результатов
+
+В данной практической работе мы применили знания полученные в результате первой практической работы для обработки массива данных.
+
+## Вывод
+
+Таким образом, мы развили практические навыки использования функций обработки данных пакета dplyr – функции select(), filter(), mutate(), arrange(), group_by()
