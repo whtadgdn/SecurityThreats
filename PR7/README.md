@@ -132,7 +132,8 @@ num_internal_hosts
 
     [1] 1000
 
-![](img/1.png)
+<img width="3437" height="1359" alt="image" src="https://github.com/user-attachments/assets/5e988532-0f9d-4c22-9fcd-c05540a8725f" />
+
 
 ### Определите суммарный объем исходящего трафика.
 
@@ -147,8 +148,9 @@ total_outgoing_bytes
     integer64
     [1] 10007506588
 
+<img width="3439" height="1323" alt="image" src="https://github.com/user-attachments/assets/3ea4b093-866c-4abc-b11a-d4d0e5177eea" />
 
-![](img/2.png)
+
 
 ### Определите суммарный объем входящего трафика.
 
@@ -163,4 +165,5 @@ total_ingoing_bytes
     integer64
     [1] 15740490053
 
-![](img/3.png)
+<img width="3438" height="1318" alt="image" src="https://github.com/user-attachments/assets/ca9d8da3-cba3-4740-a694-0fd393e9e603" />
+
