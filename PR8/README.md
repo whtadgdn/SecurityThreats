@@ -53,15 +53,17 @@ sessionInfo()
 12./13./14., зная это создаем новое поле измерения подчиняющееся
 следующему правилу:
 
-![](img/2.png)
+<img width="1275" height="450" alt="image" src="https://github.com/user-attachments/assets/f57af7aa-8d8c-4290-bfbc-ab06c537bbd1" />
 
 Для данного поля создаем счетчик
 
-![](img/3.png)
+<img width="1200" height="446" alt="image" src="https://github.com/user-attachments/assets/a2868c72-ba25-40ac-bf14-389359c637d6" />
+
 
 На основании полученного поля строим круговую диаграмму:
 
-![](img/4.png)
+<img width="3439" height="1308" alt="image" src="https://github.com/user-attachments/assets/bd0298bb-6e39-4369-8b01-e8b7b8962c7d" />
+
 
 ### 3.Представить в виде столбчатой диаграммы соотношение входящего и исходящего трафика из внутреннего сетвого сегмента.
 
@@ -71,15 +73,20 @@ sessionInfo()
 с 12./13./14., зная это создаем новое поле измерения подчиняющееся
 следующему правилу:
 
-![](img/5.png)
+<img width="1199" height="427" alt="image" src="https://github.com/user-attachments/assets/83827f12-edb6-4ad9-8055-97cdaf731d47" />
+
 
 Так же на основе этого правила создадим два счетчика:
 
-![](img/6.png)
+<img width="1231" height="504" alt="image" src="https://github.com/user-attachments/assets/6c98a958-11eb-40c6-87d8-1bc33bc09428" />
 
-![](img/7.png)
 
-Итоговая диаграмма имеет следующий вид: ![](img/8.png)
+<img width="1253" height="490" alt="image" src="https://github.com/user-attachments/assets/6b5f66a9-ac9c-415c-a290-4c52558c6339" />
+
+Итоговая диаграмма имеет следующий вид: <img width="3439" height="1316" alt="image" src="https://github.com/user-attachments/assets/b785fb78-2874-4317-b2ba-e2ab56fdea74" />
+
+<img width="3439" height="1299" alt="image" src="https://github.com/user-attachments/assets/403fe5a3-1031-4248-b2ac-4da4fe2aa1c2" />
+
 
 ### 4.Построить график активности (линейная диаграмма) объема трафика во времени.
 
@@ -88,23 +95,25 @@ sessionInfo()
 обозначающее время в микросекундах с момента начала отсчета. Формула
 данной метрики будет иметь слудующий вид:
 
-![](img/9.png)
+<img width="1219" height="596" alt="image" src="https://github.com/user-attachments/assets/48aabb43-8437-45f0-8e17-352629d8a32c" />
 
-На основе данного измерения выведим счетчик значений в каждый момент
+На основе данного измерения выведем счетчик значений в каждый момент
 времени. Счетчик имеет следующий вид:
 
-![](img/10.png)
+<img width="1220" height="740" alt="image" src="https://github.com/user-attachments/assets/11dd5d80-1337-46b8-bd9d-a1934be95476" />
 
 Получаем итоговую линейную диаграмму
 
-![](img/11.png)
+<img width="3439" height="1307" alt="image" src="https://github.com/user-attachments/assets/d010be70-1fc1-4955-ab52-8e6426798aff" />
 
 Из полученных чартов формируем дашборд:
 
-![](img/12.png)
+<img width="3439" height="1362" alt="image" src="https://github.com/user-attachments/assets/b87277d2-df63-43ed-8f7b-7d145f3388e6" />
+
+
 
 Настроив параметры публичного доступа получим [ссылку на
-дашборд](https://datalens.ru/5os7m7q0ac18q)
+дашборд](https://datalens.ru/8s7irf8hhvsss)
 
 ## Оценка результата
 
